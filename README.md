@@ -36,17 +36,17 @@ A modern web application for improving reading speed and comprehension through v
 
 ### 1. Clone and Install
 
-\`\`\`bash
+```bash
 git clone <repository-url>
 cd speed-reader
 pnpm install
-\`\`\`
+```
 
 ### 2. Database Setup
 
 Start PostgreSQL and create a database:
 
-\`\`\`bash
+```bash
 
 # Using Docker (recommended)
 
@@ -55,39 +55,39 @@ docker-compose up -d db
 # Or using local PostgreSQL
 
 createdb speedreader
-\`\`\`
+```
 
 ### 3. Environment Configuration
 
 Copy the environment template and configure:
 
-\`\`\`bash
+```bash
 cp .env.example .env.local
-\`\`\`
+```
 
-Update \`.env.local\` with your values:
+Update `.env.local` with your values:
 
-\`\`\`env
+```env
 DATABASE_URL="postgresql://postgres:postgres@localhost:5432/speedreader"
 GEMINI_API_KEY="your_gemini_api_key_here"
-\`\`\`
+```
 
 ### 4. Database Migration
 
 Run the initial database migration:
 
-\`\`\`bash
+```bash
 pnpm drizzle:generate
 pnpm drizzle:migrate
-\`\`\`
+```
 
 ### 5. Start Development Server
 
-\`\`\`bash
+```bash
 pnpm dev
-\`\`\`
+```
 
-The application will be available at \`http://localhost:3000\`.
+The application will be available at `http://localhost:3000`.
 
 ## Usage
 
@@ -124,22 +124,22 @@ Track your progress over time:
 
 ### Core Endpoints
 
-- \`POST /api/content\` - Create reading content
-- \`POST /api/content/generate\` - Generate AI content
-- \`POST /api/sessions\` - Start reading session
-- \`POST /api/sessions/complete\` - Complete session
-- \`POST /api/questions\` - Generate quiz questions
-- \`POST /api/answers\` - Submit quiz answers
-- \`GET /api/analytics/summary\` - Get analytics data
-- \`GET /api/health\` - Health check
+- `POST /api/content` - Create reading content
+- `POST /api/content/generate` - Generate AI content
+- `POST /api/sessions` - Start reading session
+- `POST /api/sessions/complete` - Complete session
+- `POST /api/questions` - Generate quiz questions
+- `POST /api/answers` - Submit quiz answers
+- `GET /api/analytics/summary` - Get analytics data
+- `GET /api/health` - Health check
 
-See \`specs/001-i-want-to/contracts/openapi.yaml\` for detailed API documentation.
+See `specs/001-i-want-to/contracts/openapi.yaml` for detailed API documentation.
 
 ## Development
 
 ### Running Tests
 
-\`\`\`bash
+```bash
 
 # Unit tests
 
@@ -152,11 +152,11 @@ pnpm test:e2e
 # All tests
 
 pnpm test:all
-\`\`\`
+```
 
 ### Database Operations
 
-\`\`\`bash
+```bash
 
 # Generate new migration
 
@@ -169,11 +169,11 @@ pnpm drizzle:migrate
 # Open Drizzle Studio
 
 pnpm drizzle:studio
-\`\`\`
+```
 
 ### Code Quality
 
-\`\`\`bash
+```bash
 
 # Linting
 
@@ -186,11 +186,11 @@ pnpm type-check
 # Build
 
 pnpm build
-\`\`\`
+```
 
 ## Project Structure
 
-\`\`\`
+```
 speed-reader/
 ├── app/ # Next.js App Router
 │ ├── api/ # API routes
@@ -208,7 +208,7 @@ speed-reader/
 │ └── contract/ # API contract tests
 ├── drizzle/ # Database migrations
 └── specs/ # Project specifications
-\`\`\`
+```
 
 ## Rate Limiting
 
