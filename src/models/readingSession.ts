@@ -8,6 +8,7 @@ export const selectReadingSessionSchema = createSelectSchema(readingSessions);
 
 // Validation schemas
 export const createSessionSchema = z.object({
+  userId: z.string().min(1),
   contentId: z.string().min(1),
   mode: z.enum(["word", "chunk", "paragraph"]),
   paceWpm: z.number().int().min(100).max(1200),

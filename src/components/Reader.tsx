@@ -36,6 +36,7 @@ import { Quiz } from "./Quiz";
 interface ReaderProps {
   content: ReadingContent;
   session: ReadingSession | null;
+  userId?: string;
   onSessionStarted: (session: ReadingSession) => void;
   onSessionCompleted: () => void;
 }
@@ -43,10 +44,12 @@ interface ReaderProps {
 export function Reader({
   content,
   session,
+  userId = "anonymous",
   onSessionStarted,
   onSessionCompleted,
 }: ReaderProps) {
   const [sessionConfig, setSessionConfig] = useState<CreateSessionRequest>({
+    userId,
     contentId: content.id,
     mode: "word",
     paceWpm: 250,

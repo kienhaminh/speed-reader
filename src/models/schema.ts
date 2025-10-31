@@ -5,6 +5,9 @@ import {
   integer,
   pgEnum,
   json,
+  boolean,
+  varchar,
+  foreignKey,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
@@ -16,8 +19,67 @@ export const modeEnum = pgEnum("mode", ["word", "chunk", "paragraph"]);
 // Tables
 export const users = pgTable("users", {
   id: text("id").primaryKey(),
+  email: varchar("email", { length: 255 }).notNull().unique(),
+  passwordHash: text("password_hash").notNull(),
+  name: varchar("name", { length: 255 }),
+  emailVerifiedAt: timestamp("email_verified_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
+
+export const sessions = pgTable(
+  "sessions",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id").notNull(),
+    token: text("token").notNull().unique(),
+    expiresAt: timestamp("expires_at").notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.userId],
+      foreignColumns: [users.id],
+      name: "sessions_user_id_fk",
+    }).onDelete("cascade"),
+  ]
+);
+
+export const emailVerifications = pgTable(
+  "email_verifications",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id").notNull(),
+    token: text("token").notNull().unique(),
+    expiresAt: timestamp("expires_at").notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.userId],
+      foreignColumns: [users.id],
+      name: "email_verifications_user_id_fk",
+    }).onDelete("cascade"),
+  ]
+);
+
+export const passwordResets = pgTable(
+  "password_resets",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id").notNull(),
+    token: text("token").notNull().unique(),
+    expiresAt: timestamp("expires_at").notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.userId],
+      foreignColumns: [users.id],
+      name: "password_resets_user_id_fk",
+    }).onDelete("cascade"),
+  ]
+);
 
 export const readingContent = pgTable("reading_content", {
   id: text("id").primaryKey(),
@@ -32,6 +94,7 @@ export const readingContent = pgTable("reading_content", {
 
 export const readingSessions = pgTable("reading_sessions", {
   id: text("id").primaryKey(),
+  userId: text("user_id").notNull(),
   contentId: text("content_id").notNull(),
   mode: modeEnum("mode").notNull(),
   paceWpm: integer("pace_wpm").notNull(),
@@ -75,11 +138,42 @@ export const studyLogs = pgTable("study_logs", {
 // Relations
 export const usersRelations = relations(users, ({ many, one }) => ({
   readingContent: many(readingContent),
+  readingSessions: many(readingSessions),
+  sessions: many(sessions),
+  emailVerifications: many(emailVerifications),
+  passwordResets: many(passwordResets),
   studyLog: one(studyLogs, {
     fields: [users.id],
     references: [studyLogs.userId],
   }),
 }));
+
+export const sessionsRelations = relations(sessions, ({ one }) => ({
+  user: one(users, {
+    fields: [sessions.userId],
+    references: [users.id],
+  }),
+}));
+
+export const emailVerificationsRelations = relations(
+  emailVerifications,
+  ({ one }) => ({
+    user: one(users, {
+      fields: [emailVerifications.userId],
+      references: [users.id],
+    }),
+  })
+);
+
+export const passwordResetsRelations = relations(
+  passwordResets,
+  ({ one }) => ({
+    user: one(users, {
+      fields: [passwordResets.userId],
+      references: [users.id],
+    }),
+  })
+);
 
 export const readingContentRelations = relations(
   readingContent,
@@ -95,6 +189,10 @@ export const readingContentRelations = relations(
 export const readingSessionsRelations = relations(
   readingSessions,
   ({ one, many }) => ({
+    user: one(users, {
+      fields: [readingSessions.userId],
+      references: [users.id],
+    }),
     content: one(readingContent, {
       fields: [readingSessions.contentId],
       references: [readingContent.id],

@@ -39,7 +39,15 @@ export {
 } from "@/models/studyLog";
 
 // User schemas
-export { createUserSchema, type CreateUserRequest } from "@/models/user";
+export {
+  signupSchema,
+  loginSchema,
+  passwordSchema,
+  type SignupRequest,
+  type LoginRequest,
+  type User,
+  type UserProfile,
+} from "@/models/user";
 
 // Additional validation helpers
 import { z } from "zod";
