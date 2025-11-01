@@ -1,4 +1,4 @@
-import { eq, and } from "drizzle-orm";
+import { eq, and, isNotNull, isNull } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { readingSessions } from "@/models/schema";
 import {
@@ -49,6 +49,7 @@ export async function startSession(
   // Create session record
   const newSession = {
     id,
+    userId: validatedRequest.userId,
     contentId: validatedRequest.contentId,
     mode: validatedRequest.mode,
     paceWpm: validatedRequest.paceWpm,
@@ -170,17 +171,20 @@ export async function getRecentSessions(
   limit: number = 10,
   completedOnly: boolean = false
 ): Promise<ReadingSession[]> {
-  const query = db
+  if (completedOnly) {
+    return await db
+      .select()
+      .from(readingSessions)
+      .where(isNotNull(readingSessions.endedAt))
+      .orderBy(readingSessions.startedAt)
+      .limit(limit);
+  }
+
+  return await db
     .select()
     .from(readingSessions)
     .orderBy(readingSessions.startedAt)
     .limit(limit);
-
-  if (completedOnly) {
-    query.where(eq(readingSessions.endedAt, null));
-  }
-
-  return await query;
 }
 
 /**
@@ -235,7 +239,7 @@ export async function updateSessionPace(
     .where(
       and(
         eq(readingSessions.id, sessionId),
-        eq(readingSessions.endedAt, null) // Only update active sessions
+        isNull(readingSessions.endedAt) // Only update active sessions
       )
     )
     .returning();

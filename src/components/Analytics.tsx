@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Card,
   CardContent,
@@ -32,11 +32,7 @@ export function Analytics() {
   const [modeFilter, setModeFilter] = useState<string>("all");
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    fetchAnalytics();
-  }, [timeFilter, modeFilter]);
-
-  const fetchAnalytics = async () => {
+  const fetchAnalytics = useCallback(async () => {
     setIsLoading(true);
     try {
       const params = new URLSearchParams();
@@ -59,7 +55,11 @@ export function Analytics() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [timeFilter, modeFilter]);
+
+  useEffect(() => {
+    void fetchAnalytics();
+  }, [fetchAnalytics]);
 
   const handleExportData = async () => {
     try {
@@ -109,7 +109,7 @@ export function Analytics() {
               </label>
               <Select
                 value={timeFilter}
-                onValueChange={(value: any) => setTimeFilter(value)}
+                onValueChange={(value: "today" | "week" | "month" | "all") => setTimeFilter(value)}
               >
                 <SelectTrigger
                   className="w-32"

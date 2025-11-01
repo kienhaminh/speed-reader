@@ -21,17 +21,17 @@ export function t(
   params?: Record<string, string | number>
 ): string {
   const keys = key.split(".");
-  let value: any = translations[language];
+  let value: unknown = translations[language];
 
   for (const k of keys) {
-    value = value?.[k];
+    value = (value as Record<string, unknown>)?.[k];
   }
 
   if (typeof value !== "string") {
     // Fallback to English if translation missing
     value = translations.en;
     for (const k of keys) {
-      value = value?.[k];
+      value = (value as Record<string, unknown>)?.[k];
     }
   }
 
@@ -41,12 +41,12 @@ export function t(
 
   // Simple parameter replacement
   if (params) {
-    return value.replace(/\{\{(\w+)\}\}/g, (match, paramKey) => {
-      return params[paramKey]?.toString() || match;
+    return value.replace(/\{\{(\w+)\}\}/g, (_match: string, paramKey: string) => {
+      return params[paramKey]?.toString() || _match;
     });
   }
 
-  return value;
+  return value as string;
 }
 
 /**

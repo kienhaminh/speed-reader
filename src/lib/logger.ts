@@ -1,6 +1,7 @@
 /**
  * Structured logging utility
  */
+import { env } from "@/lib/env";
 
 export enum LogLevel {
   DEBUG = 0,
@@ -18,7 +19,7 @@ export interface LogContext {
   ip?: string;
   userAgent?: string;
   duration?: number;
-  [key: string]: any;
+  [key: string]: string | number | boolean | undefined;
 }
 
 export interface LogEntry {
@@ -181,10 +182,26 @@ class Logger {
   }
 }
 
-// Create logger instance based on environment
-const logLevel =
-  process.env.NODE_ENV === "development" ? LogLevel.DEBUG : LogLevel.INFO;
-export const logger = new Logger(logLevel);
+// Create logger instance based on environment - lazy initialization
+let loggerInstance: Logger | null = null;
+
+function getLogLevel(): LogLevel {
+  return env.NODE_ENV === "development" ? LogLevel.DEBUG : LogLevel.INFO;
+}
+
+function getLogger() {
+  if (!loggerInstance) {
+    loggerInstance = new Logger(getLogLevel());
+  }
+  return loggerInstance;
+}
+
+// Export logger as a proxy for lazy initialization
+export const logger = new Proxy({} as Logger, {
+  get(target, prop) {
+    return getLogger()[prop as keyof Logger];
+  },
+});
 
 /**
  * Request context helper for Next.js API routes

@@ -1,5 +1,6 @@
-import { sql, eq, and, gte, lte } from "drizzle-orm";
+import { sql, eq, and, gte, lte, isNotNull } from "drizzle-orm";
 import { db } from "@/lib/db";
+import { logger } from "@/lib/logger";
 import {
   readingSessions,
   comprehensionResults,
@@ -25,8 +26,34 @@ async function getSessionsInRange(
   startDate?: Date,
   endDate?: Date,
   mode?: string
-): Promise<any[]> {
-  let query = db
+): Promise<Array<{
+  id: string;
+  mode: string;
+  durationMs: number;
+  wordsRead: number;
+  computedWpm: number;
+  endedAt: Date | null;
+  scorePercent: number | null;
+}>> {
+  // Validate mode is one of the allowed values
+  const allowedModes = ["word", "chunk", "paragraph"];
+  const validMode = mode && allowedModes.includes(mode) ? (mode as "word" | "chunk" | "paragraph") : undefined;
+
+  const conditions = [isNotNull(readingSessions.endedAt)]; // Only completed sessions
+
+  if (startDate) {
+    conditions.push(gte(readingSessions.endedAt, startDate));
+  }
+
+  if (endDate) {
+    conditions.push(lte(readingSessions.endedAt, endDate));
+  }
+
+  if (validMode) {
+    conditions.push(eq(readingSessions.mode, validMode));
+  }
+
+  const query = db
     .select({
       id: readingSessions.id,
       mode: readingSessions.mode,
@@ -41,25 +68,7 @@ async function getSessionsInRange(
       comprehensionResults,
       eq(readingSessions.id, comprehensionResults.sessionId)
     )
-    .where(eq(readingSessions.endedAt, null)); // Only completed sessions
-
-  const conditions = [];
-
-  if (startDate) {
-    conditions.push(gte(readingSessions.endedAt, startDate));
-  }
-
-  if (endDate) {
-    conditions.push(lte(readingSessions.endedAt, endDate));
-  }
-
-  if (mode) {
-    conditions.push(eq(readingSessions.mode, mode));
-  }
-
-  if (conditions.length > 0) {
-    query = query.where(and(...conditions));
-  }
+    .where(and(...conditions));
 
   return await query;
 }
@@ -67,7 +76,15 @@ async function getSessionsInRange(
 /**
  * Aggregates session data for analytics
  */
-function aggregateSessionData(sessions: any[]): SessionAggregation {
+function aggregateSessionData(sessions: Array<{
+  id: string;
+  mode: string;
+  durationMs: number;
+  wordsRead: number;
+  computedWpm: number;
+  endedAt: Date | null;
+  scorePercent: number | null;
+}>): SessionAggregation {
   const modeStats: Record<string, { totalWpm: number; count: number }> = {};
   const scores: number[] = [];
   let totalTimeMs = 0;
@@ -195,7 +212,11 @@ export async function updateStudyLog(userId: string): Promise<void> {
       });
     }
   } catch (error) {
-    console.error("Failed to update study log:", error);
+    logger.error(
+      "Failed to update study log",
+      { userId },
+      error instanceof Error ? error : new Error(String(error))
+    );
     // Don't throw - this is a background operation
   }
 }
@@ -234,7 +255,15 @@ export async function getDetailedAnalytics(
   const sessions = await getSessionsInRange(startDate, endDate);
 
   // Generate daily stats
-  const dailyMap = new Map<string, any[]>();
+  const dailyMap = new Map<string, Array<{
+    id: string;
+    mode: string;
+    durationMs: number;
+    wordsRead: number;
+    computedWpm: number;
+    endedAt: Date | null;
+    scorePercent: number | null;
+  }>>();
   for (const session of sessions) {
     if (!session.endedAt) continue;
 
@@ -263,7 +292,15 @@ export async function getDetailedAnalytics(
   );
 
   // Generate mode comparison
-  const modeMap = new Map<string, any[]>();
+  const modeMap = new Map<string, Array<{
+    id: string;
+    mode: string;
+    durationMs: number;
+    wordsRead: number;
+    computedWpm: number;
+    endedAt: Date | null;
+    scorePercent: number | null;
+  }>>();
   for (const session of sessions) {
     if (!session.endedAt) continue;
 
@@ -338,7 +375,7 @@ export async function exportAnalyticsCSV(userId?: string): Promise<string> {
       .filter((s) => s.endedAt)
       .map((s) =>
         [
-          new Date(s.endedAt).toISOString().split("T")[0],
+          new Date(s.endedAt!).toISOString().split("T")[0],
           s.mode,
           s.durationMs,
           s.wordsRead,

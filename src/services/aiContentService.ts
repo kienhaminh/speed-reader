@@ -5,101 +5,35 @@ import {
   generateContentSchema,
 } from "@/models/readingContent";
 import { createContent, countWords } from "./contentService";
+import { env } from "@/lib/env";
+import {
+  checkAIGenerationRateLimit,
+  recordAIGeneration,
+  getRateLimitStatus,
+} from "./rateLimitService";
 
-// Initialize Gemini AI
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+// Initialize Gemini AI - lazy initialization
+let genAIInstance: GoogleGenerativeAI | null = null;
 
-/**
- * Rate limiting configuration based on research
- */
-const RATE_LIMITS = {
-  PER_SESSION: 5, // Max generations per session
-  PER_DAY: 20, // Max generations per day per user
-  COOLDOWN_MS: 60000, // 1 minute between requests
-};
-
-// In-memory rate limiting (in production, use Redis or database)
-const rateLimitStore = new Map<
-  string,
-  { count: number; lastRequest: number; dailyCount: number; lastDaily: string }
->();
-
-/**
- * Checks if user has exceeded rate limits
- */
-export function checkRateLimit(userId: string): {
-  allowed: boolean;
-  reason?: string;
-} {
-  const now = Date.now();
-  const today = new Date().toISOString().split("T")[0];
-
-  const userLimits = rateLimitStore.get(userId) || {
-    count: 0,
-    lastRequest: 0,
-    dailyCount: 0,
-    lastDaily: today,
-  };
-
-  // Reset daily count if new day
-  if (userLimits.lastDaily !== today) {
-    userLimits.dailyCount = 0;
-    userLimits.lastDaily = today;
+function getGenAI() {
+  if (!genAIInstance) {
+    genAIInstance = new GoogleGenerativeAI(env.GEMINI_API_KEY);
   }
-
-  // Check daily limit
-  if (userLimits.dailyCount >= RATE_LIMITS.PER_DAY) {
-    return { allowed: false, reason: "Daily generation limit exceeded" };
-  }
-
-  // Check cooldown
-  if (now - userLimits.lastRequest < RATE_LIMITS.COOLDOWN_MS) {
-    const remainingMs =
-      RATE_LIMITS.COOLDOWN_MS - (now - userLimits.lastRequest);
-    return {
-      allowed: false,
-      reason: `Please wait ${Math.ceil(remainingMs / 1000)} seconds`,
-    };
-  }
-
-  // Check session limit (reset every hour)
-  const hourAgo = now - 60 * 60 * 1000;
-  if (
-    userLimits.lastRequest > hourAgo &&
-    userLimits.count >= RATE_LIMITS.PER_SESSION
-  ) {
-    return { allowed: false, reason: "Session generation limit exceeded" };
-  }
-
-  return { allowed: true };
+  return genAIInstance;
 }
 
 /**
- * Updates rate limit counters for user
+ * Checks if user has exceeded rate limits (backward compatibility wrapper)
  */
-function updateRateLimit(userId: string): void {
-  const now = Date.now();
-  const today = new Date().toISOString().split("T")[0];
-
-  const userLimits = rateLimitStore.get(userId) || {
-    count: 0,
-    lastRequest: 0,
-    dailyCount: 0,
-    lastDaily: today,
+export async function checkRateLimit(userId: string): Promise<{
+  allowed: boolean;
+  reason?: string;
+}> {
+  const result = await checkAIGenerationRateLimit(userId);
+  return {
+    allowed: result.allowed,
+    reason: result.reason,
   };
-
-  // Reset session count if more than an hour passed
-  const hourAgo = now - 60 * 60 * 1000;
-  if (userLimits.lastRequest <= hourAgo) {
-    userLimits.count = 0;
-  }
-
-  userLimits.count += 1;
-  userLimits.dailyCount += 1;
-  userLimits.lastRequest = now;
-  userLimits.lastDaily = today;
-
-  rateLimitStore.set(userId, userLimits);
 }
 
 /**
@@ -163,14 +97,14 @@ export async function generateContent(
   const validatedRequest = generateContentSchema.parse(request);
 
   // Check rate limits
-  const rateLimitCheck = checkRateLimit(userId);
+  const rateLimitCheck = await checkRateLimit(userId);
   if (!rateLimitCheck.allowed) {
-    throw new Error(rateLimitCheck.reason);
+    throw new Error(rateLimitCheck.reason || "Rate limit exceeded");
   }
 
   try {
     // Get Gemini model
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = getGenAI().getGenerativeModel({ model: "gemini-1.5-flash" });
 
     // Create prompt
     const prompt = createPrompt(
@@ -201,36 +135,23 @@ export async function generateContent(
       );
     }
 
+    let finalText = generatedText;
     if (actualWordCount > targetMax) {
       // Truncate if too long
       const words = generatedText.split(/\s+/);
       const truncatedWords = words.slice(0, validatedRequest.targetWords);
-      const truncatedText = truncatedWords.join(" ");
-
-      // Use truncated text
-      return await createContent(
-        {
-          language: validatedRequest.language,
-          source: "ai",
-          text: truncatedText,
-          title: generateTitle(
-            validatedRequest.topic,
-            validatedRequest.language
-          ),
-        },
-        userId
-      );
+      finalText = truncatedWords.join(" ");
     }
 
-    // Update rate limits
-    updateRateLimit(userId);
+    // Record rate limit usage
+    await recordAIGeneration(userId);
 
     // Create content record
     return await createContent(
       {
         language: validatedRequest.language,
         source: "ai",
-        text: generatedText,
+        text: finalText,
         title: generateTitle(validatedRequest.topic, validatedRequest.language),
       },
       userId
@@ -255,33 +176,13 @@ export async function generateContent(
 /**
  * Gets remaining quota for user
  */
-export function getRemainingQuota(userId: string): {
+export async function getRemainingQuota(userId: string): Promise<{
   daily: number;
   session: number;
-} {
-  const now = Date.now();
-  const today = new Date().toISOString().split("T")[0];
-
-  const userLimits = rateLimitStore.get(userId) || {
-    count: 0,
-    lastRequest: 0,
-    dailyCount: 0,
-    lastDaily: today,
-  };
-
-  // Reset daily count if new day
-  if (userLimits.lastDaily !== today) {
-    userLimits.dailyCount = 0;
-  }
-
-  // Reset session count if more than an hour passed
-  const hourAgo = now - 60 * 60 * 1000;
-  if (userLimits.lastRequest <= hourAgo) {
-    userLimits.count = 0;
-  }
-
+}> {
+  const status = await getRateLimitStatus(userId);
   return {
-    daily: Math.max(0, RATE_LIMITS.PER_DAY - userLimits.dailyCount),
-    session: Math.max(0, RATE_LIMITS.PER_SESSION - userLimits.count),
+    daily: Math.max(0, status.aiGeneration.dailyLimit - status.aiGeneration.dailyUsed),
+    session: Math.max(0, status.aiGeneration.sessionLimit - status.aiGeneration.sessionUsed),
   };
 }

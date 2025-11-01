@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateAnalyticsSummary } from "@/services/analyticsService";
+import { logger, getRequestContext } from "@/lib/logger";
 
 export async function GET(request: NextRequest) {
+  const context = getRequestContext(request);
+
   try {
     // Extract user ID from headers or session (simplified for now)
     const userId = request.headers.get("x-user-id") || undefined;
@@ -51,7 +54,11 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(summary, { status: 200 });
   } catch (error) {
-    console.error("Analytics summary error:", error);
+    logger.error(
+      "Analytics summary error",
+      context,
+      error instanceof Error ? error : new Error(String(error))
+    );
 
     // Return empty summary on error
     const emptySummary = {

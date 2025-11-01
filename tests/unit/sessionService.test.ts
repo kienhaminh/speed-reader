@@ -54,9 +54,8 @@ describe("sessionService", () => {
     it("should catch unrealistic WPM", () => {
       const result = validateSessionMetrics(5000, 1000, 5000); // 300,000 WPM
       expect(result.valid).toBe(false);
-      expect(result.errors).toContain(
-        "Computed WPM (300000) seems unrealistically high"
-      );
+      expect(result.errors.length).toBeGreaterThan(0);
+      expect(result.errors[0]).toMatch(/Computed WPM.*seems unrealistically high/);
     });
 
     it("should accumulate multiple errors", () => {

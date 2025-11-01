@@ -23,7 +23,7 @@ describe("contentService", () => {
 
     it("should handle punctuation", () => {
       expect(countWords("Hello, world!")).toBe(2);
-      expect(countWords("Don't count apostrophes as separators")).toBe(6);
+      expect(countWords("Don't count apostrophes as separators")).toBe(5);
     });
   });
 

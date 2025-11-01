@@ -25,9 +25,9 @@ test("GET /analytics/summary - returns analytics summary", async () => {
 
   // Validate averageWpmByMode structure
   expect(typeof data.averageWpmByMode).toBe("object");
-  Object.values(data.averageWpmByMode).forEach((wpm: any) => {
+  Object.values(data.averageWpmByMode).forEach((wpm: unknown) => {
     expect(typeof wpm).toBe("number");
-    expect(wpm).toBeGreaterThanOrEqual(0);
+    expect(wpm as number).toBeGreaterThanOrEqual(0);
   });
 });
 

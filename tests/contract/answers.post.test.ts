@@ -75,7 +75,7 @@ test("POST /answers - handles perfect score", async () => {
   const { session, questions } = await createSessionWithQuestions();
 
   // Use correct answers for perfect score
-  const correctAnswers = questions.questions.map((q: any) => q.correctIndex);
+  const correctAnswers = questions.questions.map((q: { correctIndex: number }) => q.correctIndex);
 
   const request = {
     sessionId: session.id,
@@ -99,7 +99,7 @@ test("POST /answers - handles zero score", async () => {
 
   // Use incorrect answers for zero score
   const incorrectAnswers = questions.questions.map(
-    (q: any) => (q.correctIndex + 1) % 4 // Always wrong answer
+    (q: { correctIndex: number }) => (q.correctIndex + 1) % 4 // Always wrong answer
   );
 
   const request = {

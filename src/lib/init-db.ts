@@ -1,29 +1,29 @@
 import { drizzle } from "drizzle-orm/postgres-js";
 import { migrate } from "drizzle-orm/postgres-js/migrator";
 import postgres from "postgres";
+import { logger } from "@/lib/logger";
+import { env } from "@/lib/env";
 
 /**
  * Initialize database and run migrations
  */
 export async function initializeDatabase(): Promise<void> {
-  const connectionString = process.env.DATABASE_URL;
-
-  if (!connectionString) {
-    throw new Error("DATABASE_URL environment variable is required");
-  }
-
-  console.log("Initializing database connection...");
+  logger.info("Initializing database connection...");
 
   // Create migration client
-  const migrationClient = postgres(connectionString, { max: 1 });
+  const migrationClient = postgres(env.DATABASE_URL, { max: 1 });
   const migrationDb = drizzle(migrationClient);
 
   try {
-    console.log("Running database migrations...");
+    logger.info("Running database migrations...");
     await migrate(migrationDb, { migrationsFolder: "./drizzle" });
-    console.log("Database migrations completed successfully");
+    logger.info("Database migrations completed successfully");
   } catch (error) {
-    console.error("Database migration failed:", error);
+    logger.error(
+      "Database migration failed",
+      {},
+      error instanceof Error ? error : new Error(String(error))
+    );
     throw error;
   } finally {
     await migrationClient.end();
@@ -34,21 +34,18 @@ export async function initializeDatabase(): Promise<void> {
  * Test database connection
  */
 export async function testDatabaseConnection(): Promise<boolean> {
-  const connectionString = process.env.DATABASE_URL;
-
-  if (!connectionString) {
-    console.error("DATABASE_URL environment variable is missing");
-    return false;
-  }
-
-  const testClient = postgres(connectionString, { max: 1 });
+  const testClient = postgres(env.DATABASE_URL, { max: 1 });
 
   try {
     await testClient`SELECT 1`;
-    console.log("Database connection test successful");
+    logger.info("Database connection test successful");
     return true;
   } catch (error) {
-    console.error("Database connection test failed:", error);
+    logger.error(
+      "Database connection test failed",
+      {},
+      error instanceof Error ? error : new Error(String(error))
+    );
     return false;
   } finally {
     await testClient.end();

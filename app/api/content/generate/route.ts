@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateContent } from "@/services/aiContentService";
 import { generateContentSchema } from "@/models/readingContent";
+import { logger, getRequestContext } from "@/lib/logger";
 
 export async function POST(request: NextRequest) {
+  const context = getRequestContext(request);
+
   try {
     const body = await request.json();
 
@@ -36,14 +39,18 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: error.message }, { status: 503 });
       }
 
-      console.error("Content generation error:", error);
+      logger.error("Content generation error", context, error);
       return NextResponse.json(
         { error: "Failed to generate content" },
         { status: 500 }
       );
     }
 
-    console.error("Unexpected error:", error);
+    logger.error(
+      "Unexpected error in content generation",
+      context,
+      new Error(String(error))
+    );
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Card,
   CardContent,
@@ -28,11 +28,7 @@ export function Quiz({ session, onCompleted }: QuizProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  useEffect(() => {
-    generateQuestions();
-  }, []);
-
-  const generateQuestions = async () => {
+  const generateQuestions = useCallback(async () => {
     try {
       const response = await fetch("/api/questions", {
         method: "POST",
@@ -59,7 +55,11 @@ export function Quiz({ session, onCompleted }: QuizProps) {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [session.id]);
+
+  useEffect(() => {
+    void generateQuestions();
+  }, [generateQuestions]);
 
   const handleAnswerSelect = (questionIndex: number, answerIndex: number) => {
     const newAnswers = [...answers];

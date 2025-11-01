@@ -22,9 +22,11 @@ A modern web application for improving reading speed and comprehension through v
 - **UI**: Tailwind CSS, shadcn/ui components
 - **Backend**: Next.js API routes
 - **Database**: PostgreSQL with Drizzle ORM
+- **Caching/Rate Limiting**: Redis (optional, with in-memory fallback)
 - **AI**: Google Generative AI (Gemini)
 - **Testing**: Vitest (unit), Playwright (e2e)
-- **Validation**: Zod schemas
+- **Validation**: Zod schemas (runtime validation)
+- **Logging**: Structured JSON logging with context
 
 ## Prerequisites
 
@@ -65,12 +67,27 @@ Copy the environment template and configure:
 cp .env.example .env.local
 ```
 
-Update `.env.local` with your values:
+Update `.env.local` with your values. See `.env.example` for detailed documentation of all variables:
 
+**Required Variables:**
 ```env
 DATABASE_URL="postgresql://postgres:postgres@localhost:5432/speedreader"
 GEMINI_API_KEY="your_gemini_api_key_here"
 ```
+
+**Optional Variables:**
+```env
+# Redis for distributed rate limiting (optional - falls back to in-memory)
+REDIS_URL="redis://localhost:6379"
+
+# Environment mode (default: development)
+NODE_ENV="development"
+```
+
+**Environment Validation:**
+- All environment variables are validated at startup using Zod
+- Invalid configuration will cause the application to fail fast with descriptive errors
+- See `src/lib/env.ts` for validation schema
 
 ### 4. Database Migration
 
@@ -214,9 +231,62 @@ speed-reader/
 
 AI content generation is rate-limited to prevent abuse:
 
-- 5 generations per session
-- 20 generations per day per user
-- 1-minute cooldown between requests
+- **5 generations per session** - Resets after 1 hour
+- **20 generations per day per user** - Resets at midnight
+- **60-second cooldown** - Between consecutive requests
+
+**Implementation**:
+- Uses Redis for distributed rate limiting in production
+- Falls back to in-memory storage for development/single-instance deployments
+- See `src/services/rateLimitService.ts` for implementation details
+
+**Configuration**:
+- Rate limits are configurable in `src/services/rateLimitService.ts`
+- Redis connection optional via `REDIS_URL` environment variable
+- In-memory fallback maintains same rate limit behavior
+
+## Logging & Monitoring
+
+The application uses structured JSON logging for observability:
+
+**Features**:
+- **Structured JSON output** - Easy to parse and analyze
+- **Request context tracking** - userId, sessionId, endpoint, method, duration
+- **Log levels** - DEBUG (dev only), INFO, WARN, ERROR
+- **Specialized helpers** - apiRequest, apiError, serviceOperation, serviceError
+- **No sensitive data** - Passwords, API keys, tokens never logged
+
+**Example Logs**:
+```json
+{
+  "timestamp": "2025-10-31T10:30:00.000Z",
+  "level": "INFO",
+  "message": "API POST /api/content",
+  "context": {
+    "method": "POST",
+    "endpoint": "/api/content",
+    "userId": "user_123",
+    "duration": 45
+  }
+}
+```
+
+**Usage in Code**:
+```typescript
+import { logger } from '@/lib/logger';
+
+// API logging
+logger.apiRequest('POST', '/api/content', { userId, contentId });
+
+// Service logging
+logger.serviceOperation('contentService', 'createContent', { userId });
+
+// General logging
+logger.info('Session completed', { sessionId, wpm: 350 });
+logger.error('Operation failed', { operation: 'generateAI' }, error);
+```
+
+See `src/lib/logger.ts` for implementation details.
 
 ## Accessibility
 
@@ -238,6 +308,16 @@ Key performance considerations:
 - Database query optimization
 - Caching strategies for static content
 
+## Documentation
+
+For detailed project documentation, see the [docs/](./docs/) directory:
+
+- [Project Overview & PDR](./docs/project-overview-pdr.md) - Vision, features, requirements, roadmap
+- [Codebase Summary](./docs/codebase-summary.md) - Structure, technologies, patterns
+- [Code Standards](./docs/code-standards.md) - Coding guidelines and best practices
+- [System Architecture](./docs/system-architecture.md) - Architecture, data flow, integrations
+- [Release Notes](./docs/RELEASE.md) - Version history and deployment guide
+
 ## Contributing
 
 1. Follow the established code style and patterns
@@ -254,9 +334,9 @@ Key performance considerations:
 
 For issues and questions:
 
-1. Check the [troubleshooting guide](docs/troubleshooting.md)
-2. Review existing [GitHub issues](issues)
-3. Create a new issue with detailed information
+1. Review existing [GitHub issues](issues)
+2. Create a new issue with detailed information
+3. Check the [documentation](./docs/) for technical details
 
 ---
 

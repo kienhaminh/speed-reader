@@ -21,6 +21,7 @@ test("POST /sessions - creates word mode session", async () => {
   const contentId = await createContent();
 
   const request = {
+    userId: "test-user",
     contentId,
     mode: "word",
     paceWpm: 250,
@@ -53,6 +54,7 @@ test("POST /sessions - creates chunk mode session with chunk size", async () => 
   const contentId = await createContent();
 
   const request = {
+    userId: "test-user",
     contentId,
     mode: "chunk",
     paceWpm: 300,
@@ -81,6 +83,7 @@ test("POST /sessions - creates paragraph mode session", async () => {
   const contentId = await createContent();
 
   const request = {
+    userId: "test-user",
     contentId,
     mode: "paragraph",
     paceWpm: 200,
@@ -103,6 +106,7 @@ test("POST /sessions - validates pace WPM range", async () => {
   const contentId = await createContent();
 
   const request = {
+    userId: "test-user",
     contentId,
     mode: "word",
     paceWpm: 50, // Below minimum
@@ -121,6 +125,7 @@ test("POST /sessions - validates chunk size range for chunk mode", async () => {
   const contentId = await createContent();
 
   const request = {
+    userId: "test-user",
     contentId,
     mode: "chunk",
     paceWpm: 250,

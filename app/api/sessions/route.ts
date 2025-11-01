@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { startSession } from "@/services/sessionService";
 import { createSessionSchema } from "@/models/readingSession";
+import { ZodError } from "zod";
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,17 +15,14 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(session, { status: 201 });
   } catch (error) {
-    if (error instanceof Error) {
-      if (
-        error.message.includes("validation") ||
-        error.message.includes("parse")
-      ) {
-        return NextResponse.json(
-          { error: "Invalid request data", details: error.message },
-          { status: 400 }
-        );
-      }
+    if (error instanceof ZodError) {
+      return NextResponse.json(
+        { error: "Invalid request data", details: error.message },
+        { status: 400 }
+      );
+    }
 
+    if (error instanceof Error) {
       if (error.message.includes("Content not found")) {
         return NextResponse.json(
           { error: "Content not found" },

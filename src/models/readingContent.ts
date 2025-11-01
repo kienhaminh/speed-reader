@@ -9,7 +9,7 @@ export const selectReadingContentSchema = createSelectSchema(readingContent);
 // Validation schemas
 export const createReadingContentSchema = z.object({
   language: z.enum(["en", "vi"]),
-  source: z.enum(["paste", "upload"]),
+  source: z.enum(["paste", "upload", "ai"]),
   text: z.string().min(1),
   title: z.string().optional(),
 });

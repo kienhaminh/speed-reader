@@ -55,7 +55,7 @@ test("POST /questions - generates 5 comprehension questions for session", async 
   expect(data.questions).toHaveLength(5);
 
   // Validate question structure
-  data.questions.forEach((question: any, index: number) => {
+  data.questions.forEach((question: { index: number; prompt: string; options: string[]; correctIndex: number }, index: number) => {
     expect(question).toMatchObject({
       index: index + 1,
       prompt: expect.any(String),

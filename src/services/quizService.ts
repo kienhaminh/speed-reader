@@ -73,8 +73,8 @@ ${text}`,
 /**
  * Validates generated questions structure
  */
-function validateQuestions(
-  questions: any[],
+export function validateQuestions(
+  questions: unknown[],
   expectedCount: number
 ): Question[] {
   if (!Array.isArray(questions) || questions.length !== expectedCount) {
@@ -84,20 +84,26 @@ function validateQuestions(
   }
 
   return questions.map((q, index) => {
-    if (!q.prompt || typeof q.prompt !== "string") {
+    const question = q as {
+      prompt?: unknown;
+      options?: unknown;
+      correctIndex?: unknown;
+    };
+
+    if (!question.prompt || typeof question.prompt !== "string") {
       throw new Error(
         `Question ${index + 1}: prompt is required and must be a string`
       );
     }
 
-    if (!Array.isArray(q.options) || q.options.length !== 4) {
+    if (!Array.isArray(question.options) || question.options.length !== 4) {
       throw new Error(`Question ${index + 1}: must have exactly 4 options`);
     }
 
     if (
-      typeof q.correctIndex !== "number" ||
-      q.correctIndex < 0 ||
-      q.correctIndex > 3
+      typeof question.correctIndex !== "number" ||
+      question.correctIndex < 0 ||
+      question.correctIndex > 3
     ) {
       throw new Error(
         `Question ${index + 1}: correctIndex must be 0, 1, 2, or 3`
@@ -106,9 +112,9 @@ function validateQuestions(
 
     return {
       index: index + 1,
-      prompt: q.prompt,
-      options: q.options,
-      correctIndex: q.correctIndex,
+      prompt: question.prompt,
+      options: question.options as string[],
+      correctIndex: question.correctIndex,
     };
   });
 }
