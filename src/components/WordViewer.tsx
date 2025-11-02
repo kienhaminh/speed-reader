@@ -22,6 +22,27 @@ export function WordViewer({
   // Split text into words
   const words = text.split(/\s+/).filter((word) => word.length > 0);
 
+  // Swipe gesture handlers for mobile navigation
+  const handleDragEnd = (
+    _event: MouseEvent | TouchEvent | PointerEvent,
+    info: { offset: { x: number } }
+  ) => {
+    if (isPlaying) return; // Don't allow manual navigation while playing
+
+    const swipeThreshold = 50;
+    if (info.offset.x > swipeThreshold && currentWordIndex > 0) {
+      // Swipe right = previous word
+      const newIndex = currentWordIndex - 1;
+      setCurrentWordIndex(newIndex);
+      onWordsRead(newIndex + 1);
+    } else if (info.offset.x < -swipeThreshold && currentWordIndex < words.length - 1) {
+      // Swipe left = next word
+      const newIndex = currentWordIndex + 1;
+      setCurrentWordIndex(newIndex);
+      onWordsRead(newIndex + 1);
+    }
+  };
+
   // Calculate interval between words (milliseconds)
   const wordsPerMinute = paceWpm;
   const intervalMs = (60 * 1000) / wordsPerMinute;
@@ -72,7 +93,11 @@ export function WordViewer({
               duration: 0.15,
               ease: "easeOut",
             }}
-            className="text-5xl sm:text-6xl md:text-8xl font-bold text-center px-8 py-6 bg-primary/5 dark:bg-primary/10 rounded-xl border-2 border-primary/20 shadow-lg"
+            drag="x"
+            dragConstraints={{ left: 0, right: 0 }}
+            dragElastic={0.2}
+            onDragEnd={handleDragEnd}
+            className="text-5xl sm:text-6xl md:text-8xl font-bold text-center px-8 py-6 bg-primary/5 dark:bg-primary/10 rounded-xl border-2 border-primary/20 shadow-lg cursor-grab active:cursor-grabbing touch-pan-x"
             data-testid="current-word"
           >
             {currentWord}

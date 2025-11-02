@@ -103,6 +103,21 @@ export function ParagraphViewer({
     onWordsRead(totalWords);
   };
 
+  // Swipe gesture handlers for mobile navigation
+  const handleDragEnd = (
+    _event: MouseEvent | TouchEvent | PointerEvent,
+    info: { offset: { x: number } }
+  ) => {
+    const swipeThreshold = 50;
+    if (info.offset.x > swipeThreshold && currentParagraphIndex > 0) {
+      // Swipe right = previous paragraph
+      handlePreviousParagraph();
+    } else if (info.offset.x < -swipeThreshold && currentParagraphIndex < paragraphs.length - 1) {
+      // Swipe left = next paragraph
+      handleNextParagraph();
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Navigation Controls */}
@@ -169,9 +184,13 @@ export function ParagraphViewer({
                 scale: isActive ? 1 : 0.98,
               }}
               transition={{ duration: 0.3, ease: "easeOut" }}
+              drag={isActive ? "x" : false}
+              dragConstraints={{ left: 0, right: 0 }}
+              dragElastic={0.2}
+              onDragEnd={isActive ? handleDragEnd : undefined}
               className={`p-6 rounded-xl border-2 transition-all duration-300 ${
                 isActive
-                  ? "bg-primary/5 dark:bg-primary/10 border-primary/30 shadow-lg highlighted"
+                  ? "bg-primary/5 dark:bg-primary/10 border-primary/30 shadow-lg highlighted cursor-grab active:cursor-grabbing touch-pan-x"
                   : isCompleted
                   ? "bg-muted/50 border-muted opacity-60 completed"
                   : "bg-card border-border"

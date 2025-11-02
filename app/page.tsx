@@ -1,16 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useState, lazy, Suspense } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AppShell } from "@/components/AppShell";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { ContentInput } from "@/components/ContentInput";
 import { Reader } from "@/components/Reader";
-import { Analytics } from "@/components/Analytics";
+import { LoadingState } from "@/components/LoadingState";
 import { ReadingContent } from "@/models/readingContent";
 import { ReadingSession } from "@/models/readingSession";
 import { FileText, BookOpen, BarChart3 } from "lucide-react";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
+
+// Lazy load Analytics component (includes heavy Recharts dependency)
+const Analytics = lazy(() =>
+  import("@/components/Analytics").then((mod) => ({ default: mod.Analytics }))
+);
 
 export default function HomePage() {
   const [activeContent, setActiveContent] = useState<ReadingContent | null>(
@@ -92,7 +97,9 @@ export default function HomePage() {
           </TabsContent>
 
           <TabsContent value="analytics" className="mt-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-lg">
-            <Analytics />
+            <Suspense fallback={<LoadingState variant="card" />}>
+              <Analytics />
+            </Suspense>
           </TabsContent>
         </div>
       </Tabs>

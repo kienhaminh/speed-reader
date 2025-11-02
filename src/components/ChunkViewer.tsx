@@ -87,6 +87,29 @@ export function ChunkViewer({
     }
   };
 
+  // Swipe gesture handlers for mobile navigation
+  const handleDragEnd = (
+    _event: MouseEvent | TouchEvent | PointerEvent,
+    info: { offset: { x: number } }
+  ) => {
+    if (isPlaying) return; // Don't allow manual navigation while playing
+
+    const swipeThreshold = 50;
+    if (info.offset.x > swipeThreshold && currentChunkIndex > 0) {
+      // Swipe right = previous chunk
+      const newIndex = currentChunkIndex - 1;
+      setCurrentChunkIndex(newIndex);
+      const wordsReadSoFar = Math.min((newIndex + 1) * chunkSize, words.length);
+      onWordsRead(wordsReadSoFar);
+    } else if (info.offset.x < -swipeThreshold && currentChunkIndex < chunks.length - 1) {
+      // Swipe left = next chunk
+      const newIndex = currentChunkIndex + 1;
+      setCurrentChunkIndex(newIndex);
+      const wordsReadSoFar = Math.min((newIndex + 1) * chunkSize, words.length);
+      onWordsRead(wordsReadSoFar);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Chunk Size Controls */}
@@ -126,7 +149,11 @@ export function ChunkViewer({
               duration: 0.2,
               ease: "easeOut",
             }}
-            className="text-3xl sm:text-4xl md:text-5xl font-bold text-center px-8 py-6 bg-primary/5 dark:bg-primary/10 rounded-xl border-2 border-primary/20 shadow-lg max-w-4xl"
+            drag="x"
+            dragConstraints={{ left: 0, right: 0 }}
+            dragElastic={0.2}
+            onDragEnd={handleDragEnd}
+            className="text-3xl sm:text-4xl md:text-5xl font-bold text-center px-8 py-6 bg-primary/5 dark:bg-primary/10 rounded-xl border-2 border-primary/20 shadow-lg max-w-4xl cursor-grab active:cursor-grabbing touch-pan-x"
             data-testid="current-chunk"
           >
             {currentChunk.join(" ")}

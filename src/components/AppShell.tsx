@@ -3,7 +3,10 @@
 import { useState, useEffect } from "react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { SkipLink } from "@/components/SkipLink";
-import { Book } from "lucide-react";
+import { HelpModal } from "@/components/HelpModal";
+import { Button } from "@/components/ui/button";
+import { Book, HelpCircle } from "lucide-react";
+import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 
 interface AppShellProps {
   children: React.ReactNode;
@@ -11,6 +14,7 @@ interface AppShellProps {
 
 export function AppShell({ children }: AppShellProps) {
   const [isScrolled, setIsScrolled] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -20,6 +24,12 @@ export function AppShell({ children }: AppShellProps) {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // Help modal keyboard shortcut
+  useKeyboardShortcuts({
+    "?": () => setHelpOpen(true),
+    "Escape": () => setHelpOpen(false),
+  });
 
   return (
     <div className="min-h-screen bg-background">
@@ -46,7 +56,17 @@ export function AppShell({ children }: AppShellProps) {
             </div>
           </div>
 
-          <nav aria-label="Main navigation">
+          <nav aria-label="Main navigation" className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setHelpOpen(true)}
+              aria-label="Open help"
+              className="w-11 h-11"
+              title="Help (Press ?)"
+            >
+              <HelpCircle className="h-5 w-5" />
+            </Button>
             <ThemeToggle />
           </nav>
         </div>
@@ -65,6 +85,9 @@ export function AppShell({ children }: AppShellProps) {
           </p>
         </div>
       </footer>
+
+      {/* Help Modal */}
+      <HelpModal open={helpOpen} onOpenChange={setHelpOpen} />
     </div>
   );
 }

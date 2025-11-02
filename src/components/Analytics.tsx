@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { motion } from "framer-motion";
 import {
   Card,
   CardContent,
@@ -16,8 +17,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { BarChart3, TrendingUp, Clock, Target, Download } from "lucide-react";
+import { BarChart3, TrendingUp, Clock, Target, Download, BookOpen } from "lucide-react";
 import { AnalyticsSummary } from "@/models/studyLog";
+import { LoadingState } from "@/components/LoadingState";
+import { EmptyState } from "@/components/EmptyState";
+import {
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+} from "recharts";
 
 export function Analytics() {
   const [summary, setSummary] = useState<AnalyticsSummary>({
@@ -31,6 +46,23 @@ export function Analytics() {
   >("all");
   const [modeFilter, setModeFilter] = useState<string>("all");
   const [isLoading, setIsLoading] = useState(true);
+
+  // Mock data for charts (in real app, this would come from API)
+  const wpmTrendData = [
+    { date: "Mon", wpm: 250, score: 75 },
+    { date: "Tue", wpm: 280, score: 80 },
+    { date: "Wed", wpm: 300, score: 85 },
+    { date: "Thu", wpm: 320, score: 82 },
+    { date: "Fri", wpm: 350, score: 90 },
+    { date: "Sat", wpm: 380, score: 88 },
+    { date: "Sun", wpm: 400, score: 92 },
+  ];
+
+  const modeComparisonData = [
+    { mode: "Word", wpm: 350, sessions: 12 },
+    { mode: "Chunk", wpm: 420, sessions: 8 },
+    { mode: "Paragraph", wpm: 280, sessions: 15 },
+  ];
 
   const fetchAnalytics = useCallback(async () => {
     setIsLoading(true);
@@ -82,7 +114,37 @@ export function Analytics() {
 
   const modes = Object.keys(summary.averageWpmByMode);
   const filteredSessionsCount =
-    modeFilter === "all" ? summary.sessionsCount : summary.sessionsCount; // This would be filtered in real implementation
+    modeFilter === "all" ? summary.sessionsCount : summary.sessionsCount;
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="max-w-6xl mx-auto space-y-6">
+        <LoadingState variant="card" count={1} />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <LoadingState variant="card" count={4} />
+        </div>
+        <LoadingState variant="chart" count={1} />
+      </div>
+    );
+  }
+
+  // Show empty state
+  if (summary.sessionsCount === 0) {
+    return (
+      <div className="max-w-6xl mx-auto">
+        <EmptyState
+          icon={BookOpen}
+          title="No reading sessions yet"
+          description="Complete your first reading session to see detailed analytics and track your progress over time."
+          action={{
+            label: "Start Reading",
+            onClick: () => window.history.back(),
+          }}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
@@ -160,76 +222,108 @@ export function Analytics() {
 
       {/* Key Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-2xl font-bold" data-testid="sessions-count">
-                  {summary.sessionsCount}
-                </p>
-                <p className="text-sm text-gray-600">Total Sessions</p>
-                {modeFilter !== "all" && (
-                  <p
-                    className="text-xs text-gray-500"
-                    data-testid="filtered-sessions-count"
-                  >
-                    {filteredSessionsCount} filtered
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0 }}
+        >
+          <Card className="border-l-4 border-l-primary">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-3xl font-bold text-foreground" data-testid="sessions-count">
+                    {summary.sessionsCount}
                   </p>
-                )}
+                  <p className="text-sm text-muted-foreground mt-1">Total Sessions</p>
+                  {modeFilter !== "all" && (
+                    <p
+                      className="text-xs text-muted-foreground mt-1"
+                      data-testid="filtered-sessions-count"
+                    >
+                      {filteredSessionsCount} filtered
+                    </p>
+                  )}
+                </div>
+                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Target className="h-6 w-6 text-primary" />
+                </div>
               </div>
-              <Target className="h-8 w-8 text-blue-600" />
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </motion.div>
 
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-2xl font-bold" data-testid="total-time">
-                  {formatTime(summary.totalTimeMs)}
-                </p>
-                <p className="text-sm text-gray-600">Reading Time</p>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.1 }}
+        >
+          <Card className="border-l-4 border-l-green-500">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-3xl font-bold text-foreground" data-testid="total-time">
+                    {formatTime(summary.totalTimeMs)}
+                  </p>
+                  <p className="text-sm text-muted-foreground mt-1">Reading Time</p>
+                </div>
+                <div className="w-12 h-12 rounded-full bg-green-500/10 flex items-center justify-center">
+                  <Clock className="h-6 w-6 text-green-600" />
+                </div>
               </div>
-              <Clock className="h-8 w-8 text-green-600" />
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </motion.div>
 
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-2xl font-bold" data-testid="average-score">
-                  {summary.averageScorePercent}%
-                </p>
-                <p className="text-sm text-gray-600">Avg Comprehension</p>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.2 }}
+        >
+          <Card className="border-l-4 border-l-purple-500">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-3xl font-bold text-foreground" data-testid="average-score">
+                    {summary.averageScorePercent}%
+                  </p>
+                  <p className="text-sm text-muted-foreground mt-1">Avg Comprehension</p>
+                </div>
+                <div className="w-12 h-12 rounded-full bg-purple-500/10 flex items-center justify-center">
+                  <TrendingUp className="h-6 w-6 text-purple-600" />
+                </div>
               </div>
-              <TrendingUp className="h-8 w-8 text-purple-600" />
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </motion.div>
 
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-2xl font-bold">
-                  {modes.length > 0
-                    ? Math.round(
-                        Object.values(summary.averageWpmByMode).reduce(
-                          (a, b) => a + b,
-                          0
-                        ) / modes.length
-                      )
-                    : 0}
-                </p>
-                <p className="text-sm text-gray-600">Overall Avg WPM</p>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.3 }}
+        >
+          <Card className="border-l-4 border-l-orange-500">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-3xl font-bold text-foreground">
+                    {modes.length > 0
+                      ? Math.round(
+                          Object.values(summary.averageWpmByMode).reduce(
+                            (a, b) => a + b,
+                            0
+                          ) / modes.length
+                        )
+                      : 0}
+                  </p>
+                  <p className="text-sm text-muted-foreground mt-1">Overall Avg WPM</p>
+                </div>
+                <div className="w-12 h-12 rounded-full bg-orange-500/10 flex items-center justify-center">
+                  <BarChart3 className="h-6 w-6 text-orange-600" />
+                </div>
               </div>
-              <BarChart3 className="h-8 w-8 text-orange-600" />
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </motion.div>
       </div>
 
       {/* Reading Mode Performance */}
@@ -271,86 +365,148 @@ export function Analytics() {
         </Card>
       )}
 
-      {/* Charts Placeholders */}
+      {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card data-testid="wpm-trend-chart">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.4 }}
+        >
+          <Card data-testid="wpm-trend-chart">
+            <CardHeader>
+              <CardTitle>WPM Trend</CardTitle>
+              <CardDescription>
+                Reading speed progression over time
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={wpmTrendData}>
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                  <XAxis dataKey="date" className="text-xs" />
+                  <YAxis className="text-xs" />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "hsl(var(--card))",
+                      border: "1px solid hsl(var(--border))",
+                      borderRadius: "0.5rem",
+                    }}
+                  />
+                  <Legend />
+                  <Line
+                    type="monotone"
+                    dataKey="wpm"
+                    stroke="hsl(var(--primary))"
+                    strokeWidth={2}
+                    dot={{ fill: "hsl(var(--primary))", r: 4 }}
+                    activeDot={{ r: 6 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.5 }}
+        >
+          <Card data-testid="score-trend-chart">
+            <CardHeader>
+              <CardTitle>Comprehension Score Trend</CardTitle>
+              <CardDescription>Quiz performance over time</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={wpmTrendData}>
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                  <XAxis dataKey="date" className="text-xs" />
+                  <YAxis className="text-xs" domain={[0, 100]} />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "hsl(var(--card))",
+                      border: "1px solid hsl(var(--border))",
+                      borderRadius: "0.5rem",
+                    }}
+                  />
+                  <Legend />
+                  <Line
+                    type="monotone"
+                    dataKey="score"
+                    stroke="#8b5cf6"
+                    strokeWidth={2}
+                    dot={{ fill: "#8b5cf6", r: 4 }}
+                    activeDot={{ r: 6 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </div>
+
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: 0.6 }}
+      >
+        <Card data-testid="mode-comparison-chart">
           <CardHeader>
-            <CardTitle>WPM Trend</CardTitle>
+            <CardTitle>Mode Comparison</CardTitle>
             <CardDescription>
-              Reading speed progression over time
+              Performance comparison across different reading modes
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="h-64 flex items-center justify-center bg-gray-50 dark:bg-gray-800 rounded-lg">
-              <p className="text-gray-500">Chart visualization would be here</p>
-            </div>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={modeComparisonData}>
+                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                <XAxis dataKey="mode" className="text-xs" />
+                <YAxis className="text-xs" />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: "hsl(var(--card))",
+                    border: "1px solid hsl(var(--border))",
+                    borderRadius: "0.5rem",
+                  }}
+                />
+                <Legend />
+                <Bar dataKey="wpm" fill="hsl(var(--primary))" radius={[8, 8, 0, 0]} />
+                <Bar dataKey="sessions" fill="#10b981" radius={[8, 8, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
           </CardContent>
         </Card>
-
-        <Card data-testid="score-trend-chart">
-          <CardHeader>
-            <CardTitle>Comprehension Score Trend</CardTitle>
-            <CardDescription>Quiz performance over time</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="h-64 flex items-center justify-center bg-gray-50 dark:bg-gray-800 rounded-lg">
-              <p className="text-gray-500">Chart visualization would be here</p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Card data-testid="mode-comparison-chart">
-        <CardHeader>
-          <CardTitle>Mode Comparison</CardTitle>
-          <CardDescription>
-            Performance comparison across different reading modes
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="h-64 flex items-center justify-center bg-gray-50 dark:bg-gray-800 rounded-lg">
-            <p className="text-gray-500">Comparison chart would be here</p>
-          </div>
-        </CardContent>
-      </Card>
+      </motion.div>
 
       {/* Export Options */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Export Data</CardTitle>
-          <CardDescription>
-            Download your reading analytics data
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex gap-4">
-            <Button variant="outline" data-testid="export-csv-btn">
-              <Download className="h-4 w-4 mr-2" />
-              Export as CSV
-            </Button>
-            <Button variant="outline" data-testid="export-json-btn">
-              <Download className="h-4 w-4 mr-2" />
-              Export as JSON
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Empty State */}
-      {summary.sessionsCount === 0 && !isLoading && (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: 0.7 }}
+      >
         <Card>
-          <CardContent className="pt-6">
-            <div className="text-center py-8">
-              <BarChart3 className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">No Data Yet</h3>
-              <p className="text-gray-600 mb-4">
-                Complete some reading sessions to see your analytics here.
-              </p>
-              <Button variant="outline">Start Reading</Button>
+          <CardHeader>
+            <CardTitle>Export Data</CardTitle>
+            <CardDescription>
+              Download your reading analytics data
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex gap-4">
+              <Button variant="outline" data-testid="export-csv-btn" onClick={handleExportData}>
+                <Download className="h-4 w-4 mr-2" />
+                Export as CSV
+              </Button>
+              <Button variant="outline" data-testid="export-json-btn" onClick={handleExportData}>
+                <Download className="h-4 w-4 mr-2" />
+                Export as JSON
+              </Button>
             </div>
           </CardContent>
         </Card>
-      )}
+      </motion.div>
     </div>
   );
 }
