@@ -1,7 +1,7 @@
 # Speed Reader - Codebase Summary
 
-**Last Updated**: 2025-10-31
-**Version**: 0.2.0
+**Last Updated**: 2025-11-02
+**Version**: 0.3.0
 **Project**: Speed Reader - Reading Speed & Comprehension Application
 
 ## Overview
@@ -133,7 +133,9 @@ speed-reader/
 - **TypeScript** - Type-safe JavaScript
 - **Tailwind CSS 4** - Utility-first styling
 - **shadcn/ui** - Component library (Radix UI + Tailwind)
-- **Lucide React** - Icon library
+- **Framer Motion 12.23.24** - Animation library (40KB)
+- **Lucide React 0.544.0** - Icon library
+- **Inter Font** - Primary typeface (Google Fonts)
 
 ### Backend Stack
 - **Next.js API Routes** - RESTful API endpoints
@@ -194,19 +196,25 @@ RESTful endpoints following Next.js App Router conventions:
 ### Components Layer (`src/components/`)
 React components organized by feature:
 
+**Layout Components:**
+- **AppShell.tsx** - Application layout wrapper with sticky header, footer, semantic HTML
+- **ThemeToggle.tsx** - Theme switcher with Sun/Moon icons, 44x44px touch target
+- **SkipLink.tsx** - Accessibility skip navigation link (keyboard-visible)
+
 **Reading Modes:**
-- **WordViewer.tsx** (2,200 tokens) - Word-by-word display with 60fps animations
-- **ChunkViewer.tsx** (1,500 tokens) - Chunk-of-meaning groups (2-8 words)
-- **ParagraphViewer.tsx** (1,400 tokens) - Paragraph highlighting
+- **WordViewer.tsx** - Word-by-word display with Framer Motion animations (150ms transitions)
+- **ChunkViewer.tsx** - Chunk-of-meaning groups (2-8 words)
+- **ParagraphViewer.tsx** - Paragraph highlighting
 
 **Core Features:**
-- **Reader.tsx** (2,545 tokens) - Main orchestrator for reading sessions
-- **ContentInput.tsx** (2,346 tokens) - Content input/AI generation form
-- **Quiz.tsx** (2,667 tokens) - Comprehension testing interface
-- **Analytics.tsx** (2,665 tokens) - Progress tracking dashboard
+- **Reader.tsx** - Main orchestrator for reading sessions
+- **ContentInput.tsx** - Content input/AI generation form with icon-based tabs
+- **Quiz.tsx** - Comprehension testing interface
+- **Analytics.tsx** - Progress tracking dashboard
 
 **UI Components:**
-- shadcn/ui components in `components/ui/` (button, card, input, etc.)
+- shadcn/ui components in `components/ui/` (button, card, input, tabs, select, etc.)
+- Enhanced with micro-interactions (scale, shadow on hover/active)
 
 ### Internationalization (`src/i18n/`)
 Multi-language support:
@@ -223,6 +231,10 @@ Utility functions and configurations:
 - **redis.ts** - Redis client with in-memory fallback
 - **accessibility.ts** - WCAG compliance utilities
 - **utils.ts** - General utilities (cn, etc.)
+
+### Context Layer (`src/contexts/`)
+React context providers:
+- **ThemeContext.tsx** - Custom theme provider with light/dark/system modes, localStorage persistence
 
 ## Key Design Patterns
 
@@ -318,21 +330,25 @@ Tests written before implementation:
 5. **Configuration Management**: Environment variables validated at startup, fail-fast pattern
 6. **Rate Limiting**: Distributed rate limiting with Redis, graceful degradation to in-memory
 7. **Testing**: Comprehensive test coverage (contract, unit, integration, e2e)
-8. **Accessibility**: WCAG compliance, keyboard navigation, screen reader support
-9. **Performance**: 60fps animations, <50ms calculations, optimized queries
-10. **Error Handling**: Graceful degradation, structured error logging, user-friendly messages
-11. **Code Quality**: ESLint, TypeScript strict mode, consistent formatting
-12. **Security**: No secrets in logs, sanitized error messages, validated inputs
+8. **Accessibility**: WCAG 2.1 AA compliance, keyboard navigation, screen reader support, skip links
+9. **Performance**: 60fps animations (GPU-accelerated), <50ms calculations, optimized queries
+10. **Animation Standards**: 150-300ms transitions, GPU properties only (transform, opacity), reduced motion support
+11. **Design System**: Inter font, warm light (#FAFAF9) and soft dark (#121212) themes, 4px spacing base
+12. **Error Handling**: Graceful degradation, structured error logging, user-friendly messages
+13. **Code Quality**: ESLint, TypeScript strict mode, consistent formatting
+14. **Security**: No secrets in logs, sanitized error messages, validated inputs
 
 ## File Statistics by Type
 
-- **Components**: 15 files (7 UI components, 8 feature components)
+- **Components**: 17 files (7 UI components, 7 feature components, 3 layout components)
+- **Contexts**: 1 context provider (ThemeContext)
 - **API Routes**: 8 endpoints
 - **Services**: 5 service modules
 - **Models**: 7 model definitions
 - **Tests**: 15 test files (7 contract, 5 integration, 3 unit)
 - **Configuration**: 10 config files
 - **Migrations**: 1 migration
+- **Styling**: 1 global CSS file with design tokens
 
 ## Top 5 Files by Complexity
 
@@ -344,14 +360,17 @@ Tests written before implementation:
 
 ## Dependencies Summary
 
-### Production Dependencies (11)
+### Production Dependencies (14)
 - @google/generative-ai - AI content generation
-- @radix-ui/* - Accessible UI primitives
+- @radix-ui/* - Accessible UI primitives (label, select, slot, tabs)
 - next, react, react-dom - Core framework
+- framer-motion - Animation library (40KB)
+- recharts - Chart library (50KB, prepared but not yet used)
+- next-themes - Theme management (2KB, not used - custom implementation)
 - drizzle-zod - Schema validation integration
 - postgres - PostgreSQL driver
 - tailwind-merge, clsx, class-variance-authority - Styling utilities
-- lucide-react - Icons
+- lucide-react - Icon library
 
 ### Development Dependencies (16)
 - Testing: vitest, @playwright/test
@@ -385,6 +404,10 @@ Tests written before implementation:
 8. **Component Composition**: React components follow single responsibility principle
 9. **Test Organization**: Tests organized by type (contract, integration, unit)
 10. **Fail-Fast Configuration**: Invalid config detected at startup, not at runtime
+11. **Design Tokens**: CSS custom properties in `src/app/globals.css` for theming
+12. **Custom Theme Implementation**: Custom React context instead of next-themes for control
+13. **Animation Performance**: GPU-accelerated properties (transform, opacity) with 150-300ms timing
+14. **Accessibility First**: Skip links, focus-visible, ARIA labels, 44px touch targets, reduced motion support
 
 ## Database Schema
 

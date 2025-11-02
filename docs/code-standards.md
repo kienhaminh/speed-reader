@@ -1,7 +1,7 @@
 # Code Standards & Codebase Structure
 
-**Last Updated**: 2025-10-31
-**Version**: 1.9.0
+**Last Updated**: 2025-11-02
+**Version**: 2.0.0
 **Applies To**: All code within Speed Reader project
 
 ## Overview
@@ -1055,6 +1055,344 @@ const expensiveCalculation = memoize((n) => {
 - ✅ API documentation updated
 - ✅ README updated if needed
 - ✅ Changelog entry added
+
+## Animation Standards
+
+### Performance Guidelines
+
+**GPU-Accelerated Properties Only**:
+```typescript
+// ✓ Good - GPU-accelerated properties
+<motion.div
+  animate={{ opacity: 1, scale: 1, x: 0, y: 0 }}
+  transition={{ duration: 0.2 }}
+/>
+
+// ✗ Bad - CPU-intensive properties
+<motion.div
+  animate={{ width: "100%", height: "200px", backgroundColor: "#fff" }}
+/>
+```
+
+**Timing Standards**:
+- **Micro-interactions**: 150-200ms (button hover, scale effects)
+- **Content transitions**: 200-300ms (page transitions, modal open/close)
+- **Long animations**: 300-500ms (complex state changes)
+- **Maximum duration**: 500ms (avoid longer animations for responsiveness)
+
+**Easing Functions**:
+```typescript
+// Standard easings
+transition={{ ease: "easeOut" }}      // Default for exits
+transition={{ ease: "easeIn" }}       // Entrances
+transition={{ ease: "easeInOut" }}    // Smooth both ways
+
+// Performance-optimized cubic-bezier
+transition={{ ease: [0.4, 0.0, 0.2, 1] }}  // Material Design standard
+```
+
+### Framer Motion Best Practices
+
+**AnimatePresence for Mount/Unmount**:
+```typescript
+<AnimatePresence mode="wait">
+  <motion.div
+    key={currentItem}
+    initial={{ opacity: 0, scale: 0.8, y: 20 }}
+    animate={{ opacity: 1, scale: 1, y: 0 }}
+    exit={{ opacity: 0, scale: 0.8, y: -20 }}
+    transition={{ duration: 0.15, ease: "easeOut" }}
+  >
+    {content}
+  </motion.div>
+</AnimatePresence>
+```
+
+**Optimized Animation Properties**:
+- `transform` properties: `x`, `y`, `scale`, `rotate`
+- `opacity`
+- Avoid: `width`, `height`, `top`, `left`, `margin`, `padding`
+
+**Performance Monitoring**:
+- Target 60fps (16.67ms per frame)
+- Use Chrome DevTools Performance tab to verify
+- GPU usage should remain stable during animations
+
+### Reduced Motion Support
+
+**Always Respect User Preferences**:
+```css
+/* In globals.css */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+```
+
+**Framer Motion with Reduced Motion**:
+```typescript
+import { useReducedMotion } from 'framer-motion';
+
+function Component() {
+  const prefersReducedMotion = useReducedMotion();
+
+  return (
+    <motion.div
+      animate={{ opacity: 1, x: 0 }}
+      transition={{
+        duration: prefersReducedMotion ? 0.01 : 0.3,
+      }}
+    />
+  );
+}
+```
+
+## Accessibility Standards
+
+### WCAG 2.1 Level AA Compliance
+
+**Focus Management**:
+```css
+/* Focus visible only for keyboard navigation */
+*:focus:not(:focus-visible) {
+  outline: none;
+}
+
+*:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+```
+
+**Skip Links**:
+```typescript
+// Required on all pages
+<a
+  href="#main-content"
+  className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50"
+>
+  Skip to main content
+</a>
+
+// Main content must have id="main-content"
+<main id="main-content">...</main>
+```
+
+### Touch Target Requirements
+
+**Minimum Size**: 44x44px (WCAG 2.1 AA)
+```typescript
+// ✓ Good - Meets touch target size
+<Button size="icon" className="w-11 h-11">
+  <Icon className="h-5 w-5" />
+</Button>
+
+// ✗ Bad - Too small
+<button className="w-6 h-6">
+  <Icon />
+</button>
+```
+
+### ARIA Labels and Roles
+
+**Interactive Elements**:
+```typescript
+// Buttons with icon-only content
+<Button
+  variant="ghost"
+  size="icon"
+  aria-label="Toggle theme"
+  title="Toggle between light, dark, and system theme"
+>
+  <Sun className="h-5 w-5" />
+  <span className="sr-only">Toggle theme</span>
+</Button>
+
+// Progress indicators
+<div
+  role="progressbar"
+  aria-valuenow={progress}
+  aria-valuemin={0}
+  aria-valuemax={100}
+>
+  <div style={{ width: `${progress}%` }} />
+</div>
+
+// Live regions for dynamic content
+<p className="sr-only" aria-live="polite">
+  Currently reading: {currentWord}
+</p>
+```
+
+### Semantic HTML
+
+**Use Semantic Elements**:
+```typescript
+// ✓ Good - Semantic HTML
+<header>
+  <nav aria-label="Main navigation">
+    <ul>
+      <li><a href="/">Home</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main id="main-content">
+  <article>
+    <h1>Title</h1>
+    <section>Content</section>
+  </article>
+</main>
+
+<footer>
+  <p>Copyright info</p>
+</footer>
+
+// ✗ Bad - Non-semantic divs
+<div className="header">
+  <div className="nav">...</div>
+</div>
+<div className="content">...</div>
+```
+
+### Keyboard Navigation
+
+**Requirements**:
+- All interactive elements must be keyboard accessible
+- Tab order must be logical
+- Focus indicators must be visible
+- Escape key should close modals/dropdowns
+- Enter/Space should activate buttons
+
+**Testing Checklist**:
+- ✅ Can navigate entire interface with Tab/Shift+Tab
+- ✅ Can activate all buttons with Enter/Space
+- ✅ Can close modals with Escape
+- ✅ Focus indicators are clearly visible
+- ✅ Tab order follows visual layout
+
+### Color Contrast
+
+**WCAG AA Requirements**:
+- Normal text: 4.5:1 contrast ratio
+- Large text (18pt+): 3:1 contrast ratio
+- UI components: 3:1 contrast ratio
+
+**Design Token Compliance**:
+```css
+/* Light mode - AA compliant */
+--foreground: #1A1A1A;        /* 16.5:1 on #FAFAF9 background */
+--muted-foreground: #52525B;  /* 5.2:1 on #FAFAF9 background */
+
+/* Dark mode - AA compliant */
+--foreground: #E5E5E5;        /* 14.8:1 on #121212 background */
+--muted-foreground: #A3A3A3;  /* 5.1:1 on #121212 background */
+```
+
+**Testing Tools**:
+- Chrome DevTools Lighthouse
+- axe DevTools browser extension
+- WebAIM Contrast Checker
+
+### Screen Reader Support
+
+**Best Practices**:
+```typescript
+// Hide decorative elements
+<div aria-hidden="true">
+  <DecorativeIcon />
+</div>
+
+// Provide alternative text
+<img src="chart.png" alt="Bar chart showing reading speed improvements over 6 months" />
+
+// Complex interactions
+<button
+  onClick={toggleTheme}
+  aria-label={`Current theme: ${theme}. Click to cycle themes`}
+>
+  <ThemeIcon />
+</button>
+```
+
+## Theme Implementation Standards
+
+### Custom Theme Provider Pattern
+
+**Use Custom Context over next-themes**:
+```typescript
+// src/contexts/ThemeContext.tsx
+import { createContext, useContext, useState, useEffect } from "react";
+
+type Theme = "light" | "dark" | "system";
+
+interface ThemeContextType {
+  theme: Theme;
+  setTheme: (theme: Theme) => void;
+  resolvedTheme: "light" | "dark";
+}
+
+// Implementation with localStorage persistence
+export function ThemeProvider({ children }: { children: React.ReactNode }) {
+  const [theme, setTheme] = useState<Theme>(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("theme") as Theme | null;
+      return stored || "system";
+    }
+    return "system";
+  });
+
+  // Apply theme class to document root
+  useEffect(() => {
+    const root = document.documentElement;
+    root.classList.remove("light", "dark");
+    root.classList.add(resolvedTheme);
+    localStorage.setItem("theme", theme);
+  }, [theme, resolvedTheme]);
+
+  return (
+    <ThemeContext.Provider value={{ theme, setTheme, resolvedTheme }}>
+      {children}
+    </ThemeContext.Provider>
+  );
+}
+```
+
+### Design Token Management
+
+**CSS Custom Properties in globals.css**:
+```css
+:root {
+  /* Light mode tokens */
+  --background: #FAFAF9;
+  --foreground: #1A1A1A;
+  --primary: #3B82F6;
+  --radius: 0.625rem;
+}
+
+.dark {
+  /* Dark mode tokens */
+  --background: #121212;
+  --foreground: #E5E5E5;
+  --primary: #60A5FA;
+}
+```
+
+**Usage in Components**:
+```typescript
+// Use Tailwind classes that reference CSS variables
+<div className="bg-background text-foreground">
+  <Button className="bg-primary text-primary-foreground">
+    Click me
+  </Button>
+</div>
+```
 
 ## Enforcement
 

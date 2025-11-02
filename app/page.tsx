@@ -2,11 +2,13 @@
 
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { AppShell } from "@/components/AppShell";
 import { ContentInput } from "@/components/ContentInput";
 import { Reader } from "@/components/Reader";
 import { Analytics } from "@/components/Analytics";
 import { ReadingContent } from "@/models/readingContent";
 import { ReadingSession } from "@/models/readingSession";
+import { FileText, BookOpen, BarChart3 } from "lucide-react";
 
 export default function HomePage() {
   const [activeContent, setActiveContent] = useState<ReadingContent | null>(
@@ -32,39 +34,43 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
-      <div className="container mx-auto px-4 py-8">
-        <header className="mb-8 text-center">
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
-            Speed Reader
-          </h1>
-          <p className="text-lg text-gray-600 dark:text-gray-300">
-            Enhance your reading speed and comprehension
-          </p>
-        </header>
+    <AppShell>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-3 h-auto p-1 gap-1">
+          <TabsTrigger
+            value="content"
+            data-testid="content-tab"
+            className="flex items-center gap-2 px-4 py-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all duration-200"
+          >
+            <FileText className="h-4 w-4" aria-hidden="true" />
+            <span>Content</span>
+          </TabsTrigger>
+          <TabsTrigger
+            value="reading"
+            data-testid="reading-tab"
+            disabled={!activeContent}
+            className="flex items-center gap-2 px-4 py-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            aria-label={activeContent ? "Reading tab" : "Reading tab (disabled until content is created)"}
+          >
+            <BookOpen className="h-4 w-4" aria-hidden="true" />
+            <span>Reading</span>
+          </TabsTrigger>
+          <TabsTrigger
+            value="analytics"
+            data-testid="analytics-tab"
+            className="flex items-center gap-2 px-4 py-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all duration-200"
+          >
+            <BarChart3 className="h-4 w-4" aria-hidden="true" />
+            <span>Analytics</span>
+          </TabsTrigger>
+        </TabsList>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="content" data-testid="content-tab">
-              Content
-            </TabsTrigger>
-            <TabsTrigger
-              value="reading"
-              data-testid="reading-tab"
-              disabled={!activeContent}
-            >
-              Reading
-            </TabsTrigger>
-            <TabsTrigger value="analytics" data-testid="analytics-tab">
-              Analytics
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="content" className="mt-6">
+        <div className="mt-6">
+          <TabsContent value="content" className="mt-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-lg">
             <ContentInput onContentCreated={handleContentCreated} />
           </TabsContent>
 
-          <TabsContent value="reading" className="mt-6">
+          <TabsContent value="reading" className="mt-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-lg">
             {activeContent && (
               <Reader
                 content={activeContent}
@@ -75,11 +81,11 @@ export default function HomePage() {
             )}
           </TabsContent>
 
-          <TabsContent value="analytics" className="mt-6">
+          <TabsContent value="analytics" className="mt-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-lg">
             <Analytics />
           </TabsContent>
-        </Tabs>
-      </div>
-    </div>
+        </div>
+      </Tabs>
+    </AppShell>
   );
 }

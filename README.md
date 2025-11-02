@@ -19,11 +19,13 @@ A modern web application for improving reading speed and comprehension through v
 ## Tech Stack
 
 - **Frontend**: Next.js 15 with App Router, React 19, TypeScript
-- **UI**: Tailwind CSS, shadcn/ui components
+- **UI**: Tailwind CSS 4, shadcn/ui components, Framer Motion animations
+- **Styling**: Inter font family, custom theme system (light/dark/system)
 - **Backend**: Next.js API routes
 - **Database**: PostgreSQL with Drizzle ORM
 - **Caching/Rate Limiting**: Redis (optional, with in-memory fallback)
 - **AI**: Google Generative AI (Gemini)
+- **Icons**: Lucide React
 - **Testing**: Vitest (unit), Playwright (e2e)
 - **Validation**: Zod schemas (runtime validation)
 - **Logging**: Structured JSON logging with context
@@ -290,23 +292,30 @@ See `src/lib/logger.ts` for implementation details.
 
 ## Accessibility
 
-The application follows WCAG guidelines:
+The application follows WCAG 2.1 Level AA guidelines:
 
-- Full keyboard navigation support
-- Screen reader compatibility
-- High contrast mode support
-- Focus management for dynamic content
-- ARIA labels and live regions
+- **Keyboard Navigation**: Full keyboard support with visible focus indicators
+- **Screen Reader**: Compatible with NVDA, JAWS, VoiceOver
+- **Skip Links**: Quick navigation to main content
+- **Touch Targets**: Minimum 44x44px for all interactive elements
+- **Focus Management**: Focus-visible indicators, logical tab order
+- **ARIA Labels**: Comprehensive labels and live regions
+- **Color Contrast**: Minimum 4.5:1 for normal text, 3:1 for large text
+- **Reduced Motion**: Respects prefers-reduced-motion preference
+- **Semantic HTML**: Proper heading hierarchy, landmarks, roles
 
 ## Performance
 
-Key performance considerations:
+Key performance metrics and optimizations:
 
-- 60fps animations and transitions
-- <50ms metric calculations
-- Optimized bundle size with code splitting
-- Database query optimization
-- Caching strategies for static content
+- **60fps Animations**: GPU-accelerated transforms and opacity (150-300ms timing)
+- **Bundle Size**: First Load JS 201 KB, Main page 87.7 KB (within 250 KB budget)
+- **Metric Calculations**: <50ms for WPM and progress calculations
+- **Animation Properties**: GPU-only (transform, opacity), no layout thrashing
+- **Code Splitting**: Optimized bundle with dynamic imports
+- **Database Queries**: Indexed queries with connection pooling
+- **Caching**: Static content cached, Redis-based rate limiting
+- **Font Loading**: Inter font with `display: swap` strategy
 
 ## Documentation
 
@@ -315,6 +324,7 @@ For detailed project documentation, see the [docs/](./docs/) directory:
 - [Project Overview & PDR](./docs/project-overview-pdr.md) - Vision, features, requirements, roadmap
 - [Codebase Summary](./docs/codebase-summary.md) - Structure, technologies, patterns
 - [Code Standards](./docs/code-standards.md) - Coding guidelines and best practices
+- [Design Guidelines](./docs/design-guidelines.md) - UI/UX design system, tokens, accessibility
 - [System Architecture](./docs/system-architecture.md) - Architecture, data flow, integrations
 - [Release Notes](./docs/RELEASE.md) - Version history and deployment guide
 

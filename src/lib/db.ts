@@ -27,3 +27,12 @@ export const db = new Proxy({} as ReturnType<typeof drizzle>, {
     return getDb()[prop as keyof ReturnType<typeof drizzle>];
   },
 });
+
+// Cleanup function for tests and graceful shutdown
+export async function closeDbConnection() {
+  if (client) {
+    await client.end();
+    client = null;
+    dbInstance = null;
+  }
+}

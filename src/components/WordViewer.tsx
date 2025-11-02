@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface WordViewerProps {
   text: string;
@@ -60,58 +61,98 @@ export function WordViewer({
   return (
     <div className="space-y-6">
       {/* Current Word Display */}
-      <div className="min-h-[200px] flex items-center justify-center">
-        <div
-          className="text-6xl md:text-8xl font-bold text-center px-8 py-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border-2 border-blue-200 dark:border-blue-800"
-          data-testid="current-word"
-        >
-          {currentWord}
-        </div>
+      <div className="min-h-[240px] md:min-h-[300px] flex items-center justify-center">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentWord + currentWordIndex}
+            initial={{ opacity: 0, scale: 0.8, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.8, y: -20 }}
+            transition={{
+              duration: 0.15,
+              ease: "easeOut",
+            }}
+            className="text-5xl sm:text-6xl md:text-8xl font-bold text-center px-8 py-6 bg-primary/5 dark:bg-primary/10 rounded-xl border-2 border-primary/20 shadow-lg"
+            data-testid="current-word"
+          >
+            {currentWord}
+          </motion.div>
+        </AnimatePresence>
       </div>
 
       {/* Progress Bar */}
-      <div className="space-y-2">
-        <div className="flex justify-between text-sm text-gray-600">
+      <div className="space-y-2" role="progressbar" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100}>
+        <div className="flex justify-between text-sm text-muted-foreground">
           <span>
             Word {currentWordIndex + 1} of {words.length}
           </span>
           <span>{Math.round(progress)}% complete</span>
         </div>
-        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-          <div
-            className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-            style={{ width: `${progress}%` }}
+        <div className="w-full bg-secondary rounded-full h-2 overflow-hidden">
+          <motion.div
+            className="bg-primary h-2 rounded-full"
+            initial={{ width: 0 }}
+            animate={{ width: `${progress}%` }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
           />
         </div>
       </div>
 
       {/* Word Context */}
-      <div className="text-center text-sm text-gray-600 max-w-2xl mx-auto">
-        <p>
-          {words
-            .slice(Math.max(0, currentWordIndex - 5), currentWordIndex)
-            .join(" ")}{" "}
-          <span className="bg-yellow-200 dark:bg-yellow-900/50 px-1 rounded">
+      <motion.div
+        className="text-center text-sm text-muted-foreground max-w-2xl mx-auto leading-relaxed"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.2 }}
+      >
+        <p className="sr-only" aria-live="polite">
+          Currently reading: {currentWord}
+        </p>
+        <p aria-hidden="true">
+          <span className="opacity-60">
+            {words
+              .slice(Math.max(0, currentWordIndex - 5), currentWordIndex)
+              .join(" ")}
+          </span>{" "}
+          <span className="bg-primary/20 dark:bg-primary/30 px-2 py-1 rounded font-medium text-foreground">
             {currentWord}
           </span>{" "}
-          {words.slice(currentWordIndex + 1, currentWordIndex + 6).join(" ")}
+          <span className="opacity-60">
+            {words.slice(currentWordIndex + 1, currentWordIndex + 6).join(" ")}
+          </span>
         </p>
-      </div>
+      </motion.div>
 
       {/* Reading Stats */}
       <div className="grid grid-cols-3 gap-4 text-center text-sm">
-        <div>
-          <p className="font-semibold">{paceWpm}</p>
-          <p className="text-gray-600">Target WPM</p>
-        </div>
-        <div>
-          <p className="font-semibold">{Math.round(60000 / intervalMs)}</p>
-          <p className="text-gray-600">Actual WPM</p>
-        </div>
-        <div>
-          <p className="font-semibold">{Math.round(intervalMs)}</p>
-          <p className="text-gray-600">Word Interval (ms)</p>
-        </div>
+        <motion.div
+          className="p-3 rounded-lg bg-card border"
+          whileHover={{ scale: 1.02 }}
+          transition={{ duration: 0.2 }}
+        >
+          <p className="text-2xl font-bold text-foreground">{paceWpm}</p>
+          <p className="text-muted-foreground text-xs mt-1">Target WPM</p>
+        </motion.div>
+        <motion.div
+          className="p-3 rounded-lg bg-card border"
+          whileHover={{ scale: 1.02 }}
+          transition={{ duration: 0.2 }}
+        >
+          <p className="text-2xl font-bold text-foreground">
+            {Math.round(60000 / intervalMs)}
+          </p>
+          <p className="text-muted-foreground text-xs mt-1">Actual WPM</p>
+        </motion.div>
+        <motion.div
+          className="p-3 rounded-lg bg-card border"
+          whileHover={{ scale: 1.02 }}
+          transition={{ duration: 0.2 }}
+        >
+          <p className="text-2xl font-bold text-foreground">
+            {Math.round(intervalMs)}
+          </p>
+          <p className="text-muted-foreground text-xs mt-1">Interval (ms)</p>
+        </motion.div>
       </div>
     </div>
   );

@@ -9,6 +9,8 @@ export default defineConfig({
     // Exclude Playwright integration tests - they should only be run by Playwright
     include: ["tests/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"],
     exclude: ["tests/integration/**"],
+    // Allow sufficient time for cleanup (database connections, mock servers)
+    teardownTimeout: 30000,
   },
   resolve: {
     alias: {
