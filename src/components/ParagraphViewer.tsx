@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, SkipForward } from "lucide-react";
 
@@ -154,38 +155,55 @@ export function ParagraphViewer({
       {/* Paragraphs Display */}
       <div className="space-y-4" data-testid="paragraph-container">
         {paragraphs.map((paragraph, index) => {
-          let className =
-            "p-6 rounded-lg border-2 transition-all duration-300 ";
-
-          if (index === currentParagraphIndex) {
-            className +=
-              "bg-purple-50 dark:bg-purple-900/20 border-purple-300 dark:border-purple-700 highlighted";
-          } else if (index < currentParagraphIndex) {
-            className +=
-              "bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700 opacity-60 completed";
-          } else {
-            className +=
-              "bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700";
-          }
+          const isActive = index === currentParagraphIndex;
+          const isCompleted = index < currentParagraphIndex;
+          const isPending = index > currentParagraphIndex;
 
           return (
-            <div
+            <motion.div
               key={index}
-              className={className}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{
+                opacity: isPending ? 0.6 : 1,
+                y: 0,
+                scale: isActive ? 1 : 0.98,
+              }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+              className={`p-6 rounded-xl border-2 transition-all duration-300 ${
+                isActive
+                  ? "bg-primary/5 dark:bg-primary/10 border-primary/30 shadow-lg highlighted"
+                  : isCompleted
+                  ? "bg-muted/50 border-muted opacity-60 completed"
+                  : "bg-card border-border"
+              }`}
               data-testid={`paragraph-${index}`}
             >
-              <p className="text-lg leading-relaxed">{paragraph}</p>
-              <div className="mt-2 text-xs text-gray-500">
-                Paragraph {index + 1} • {paragraphWordCounts[index]} words
+              <p className="text-lg leading-loose max-w-[70ch]">{paragraph}</p>
+              <div className="mt-3 text-xs text-muted-foreground flex items-center gap-2">
+                <span>Paragraph {index + 1}</span>
+                <span>•</span>
+                <span>{paragraphWordCounts[index]} words</span>
+                {isActive && (
+                  <motion.span
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="ml-2 px-2 py-0.5 bg-primary/20 text-primary text-xs rounded-full font-medium"
+                  >
+                    Reading now
+                  </motion.span>
+                )}
+                {isCompleted && (
+                  <span className="ml-2 text-xs">✓ Completed</span>
+                )}
               </div>
-            </div>
+            </motion.div>
           );
         })}
       </div>
 
       {/* Progress Bar */}
-      <div className="space-y-2">
-        <div className="flex justify-between text-sm text-gray-600">
+      <div className="space-y-2" role="progressbar" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100}>
+        <div className="flex justify-between text-sm text-muted-foreground">
           <span data-testid="reading-progress">
             {Math.round(progress)}% complete
           </span>
@@ -193,34 +211,56 @@ export function ParagraphViewer({
             {currentParagraphIndex + 1} paragraphs read
           </span>
         </div>
-        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-          <div
-            className="bg-purple-600 h-2 rounded-full transition-all duration-300"
-            style={{ width: `${progress}%` }}
+        <div className="w-full bg-secondary rounded-full h-2 overflow-hidden">
+          <motion.div
+            className="bg-primary h-2 rounded-full"
+            initial={{ width: 0 }}
+            animate={{ width: `${progress}%` }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
           />
         </div>
       </div>
 
       {/* Reading Stats */}
       <div className="grid grid-cols-4 gap-4 text-center text-sm">
-        <div>
-          <p className="font-semibold">{paceWpm}</p>
-          <p className="text-gray-600">Target WPM</p>
-        </div>
-        <div>
-          <p className="font-semibold">{currentParagraphWords}</p>
-          <p className="text-gray-600">Words in Current</p>
-        </div>
-        <div>
-          <p className="font-semibold">
+        <motion.div
+          className="p-3 rounded-lg bg-card border"
+          whileHover={{ scale: 1.02 }}
+          transition={{ duration: 0.2 }}
+        >
+          <p className="text-2xl font-bold text-foreground">{paceWpm}</p>
+          <p className="text-muted-foreground text-xs mt-1">Target WPM</p>
+        </motion.div>
+        <motion.div
+          className="p-3 rounded-lg bg-card border"
+          whileHover={{ scale: 1.02 }}
+          transition={{ duration: 0.2 }}
+        >
+          <p className="text-2xl font-bold text-foreground">
+            {currentParagraphWords}
+          </p>
+          <p className="text-muted-foreground text-xs mt-1">Current Words</p>
+        </motion.div>
+        <motion.div
+          className="p-3 rounded-lg bg-card border"
+          whileHover={{ scale: 1.02 }}
+          transition={{ duration: 0.2 }}
+        >
+          <p className="text-2xl font-bold text-foreground">
             {Math.round(timePerParagraphMs / 1000)}
           </p>
-          <p className="text-gray-600">Seconds/Paragraph</p>
-        </div>
-        <div>
-          <p className="font-semibold">{totalWordsInCurrentParagraphs}</p>
-          <p className="text-gray-600">Total Words Read</p>
-        </div>
+          <p className="text-muted-foreground text-xs mt-1">Seconds/Para</p>
+        </motion.div>
+        <motion.div
+          className="p-3 rounded-lg bg-card border"
+          whileHover={{ scale: 1.02 }}
+          transition={{ duration: 0.2 }}
+        >
+          <p className="text-2xl font-bold text-foreground">
+            {totalWordsInCurrentParagraphs}
+          </p>
+          <p className="text-muted-foreground text-xs mt-1">Total Words</p>
+        </motion.div>
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Plus, Minus } from "lucide-react";
 
@@ -114,68 +115,106 @@ export function ChunkViewer({
       </div>
 
       {/* Current Chunk Display */}
-      <div className="min-h-[200px] flex items-center justify-center">
-        <div
-          className="text-4xl md:text-5xl font-bold text-center px-8 py-6 bg-green-50 dark:bg-green-900/20 rounded-lg border-2 border-green-200 dark:border-green-800 max-w-4xl"
-          data-testid="current-chunk"
-        >
-          {currentChunk.join(" ")}
-        </div>
+      <div className="min-h-[200px] md:min-h-[240px] flex items-center justify-center">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentChunkIndex}
+            initial={{ opacity: 0, scale: 0.9, y: 15 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: -15 }}
+            transition={{
+              duration: 0.2,
+              ease: "easeOut",
+            }}
+            className="text-3xl sm:text-4xl md:text-5xl font-bold text-center px-8 py-6 bg-primary/5 dark:bg-primary/10 rounded-xl border-2 border-primary/20 shadow-lg max-w-4xl"
+            data-testid="current-chunk"
+          >
+            {currentChunk.join(" ")}
+          </motion.div>
+        </AnimatePresence>
       </div>
 
       {/* Progress Bar */}
-      <div className="space-y-2">
-        <div className="flex justify-between text-sm text-gray-600">
+      <div className="space-y-2" role="progressbar" aria-valuenow={progress} aria-valuemin={0} aria-valuemax={100}>
+        <div className="flex justify-between text-sm text-muted-foreground">
           <span>
             Chunk {currentChunkIndex + 1} of {chunks.length}
           </span>
           <span>{Math.round(progress)}% complete</span>
         </div>
-        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-          <div
-            className="bg-green-600 h-2 rounded-full transition-all duration-300"
-            style={{ width: `${progress}%` }}
+        <div className="w-full bg-secondary rounded-full h-2 overflow-hidden">
+          <motion.div
+            className="bg-primary h-2 rounded-full"
+            initial={{ width: 0 }}
+            animate={{ width: `${progress}%` }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
           />
         </div>
       </div>
 
       {/* Chunk Context */}
-      <div className="text-center text-sm text-gray-600 max-w-4xl mx-auto">
-        <p>
+      <motion.div
+        className="text-center text-sm text-muted-foreground max-w-4xl mx-auto leading-relaxed"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.2 }}
+      >
+        <p className="sr-only" aria-live="polite">
+          Currently reading chunk: {currentChunk.join(" ")}
+        </p>
+        <p aria-hidden="true">
           {chunks[currentChunkIndex - 1]?.join(" ") && (
-            <span className="text-gray-400">
+            <span className="opacity-50">
               {chunks[currentChunkIndex - 1].join(" ")}
             </span>
           )}{" "}
-          <span className="bg-yellow-200 dark:bg-yellow-900/50 px-2 py-1 rounded">
+          <span className="bg-primary/20 dark:bg-primary/30 px-2 py-1 rounded font-medium text-foreground">
             {currentChunk.join(" ")}
           </span>{" "}
           {chunks[currentChunkIndex + 1]?.join(" ") && (
-            <span className="text-gray-400">
+            <span className="opacity-50">
               {chunks[currentChunkIndex + 1].join(" ")}
             </span>
           )}
         </p>
-      </div>
+      </motion.div>
 
       {/* Reading Stats */}
       <div className="grid grid-cols-4 gap-4 text-center text-sm">
-        <div>
-          <p className="font-semibold">{paceWpm}</p>
-          <p className="text-gray-600">Target WPM</p>
-        </div>
-        <div>
-          <p className="font-semibold">{chunkSize}</p>
-          <p className="text-gray-600">Words/Chunk</p>
-        </div>
-        <div>
-          <p className="font-semibold">{Math.round(intervalMs)}</p>
-          <p className="text-gray-600">Chunk Interval (ms)</p>
-        </div>
-        <div>
-          <p className="font-semibold">{wordsRead}</p>
-          <p className="text-gray-600">Words Read</p>
-        </div>
+        <motion.div
+          className="p-3 rounded-lg bg-card border"
+          whileHover={{ scale: 1.02 }}
+          transition={{ duration: 0.2 }}
+        >
+          <p className="text-2xl font-bold text-foreground">{paceWpm}</p>
+          <p className="text-muted-foreground text-xs mt-1">Target WPM</p>
+        </motion.div>
+        <motion.div
+          className="p-3 rounded-lg bg-card border"
+          whileHover={{ scale: 1.02 }}
+          transition={{ duration: 0.2 }}
+        >
+          <p className="text-2xl font-bold text-foreground">{chunkSize}</p>
+          <p className="text-muted-foreground text-xs mt-1">Words/Chunk</p>
+        </motion.div>
+        <motion.div
+          className="p-3 rounded-lg bg-card border"
+          whileHover={{ scale: 1.02 }}
+          transition={{ duration: 0.2 }}
+        >
+          <p className="text-2xl font-bold text-foreground">
+            {Math.round(intervalMs)}
+          </p>
+          <p className="text-muted-foreground text-xs mt-1">Interval (ms)</p>
+        </motion.div>
+        <motion.div
+          className="p-3 rounded-lg bg-card border"
+          whileHover={{ scale: 1.02 }}
+          transition={{ duration: 0.2 }}
+        >
+          <p className="text-2xl font-bold text-foreground">{wordsRead}</p>
+          <p className="text-muted-foreground text-xs mt-1">Words Read</p>
+        </motion.div>
       </div>
     </div>
   );

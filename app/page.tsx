@@ -3,12 +3,14 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AppShell } from "@/components/AppShell";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { ContentInput } from "@/components/ContentInput";
 import { Reader } from "@/components/Reader";
 import { Analytics } from "@/components/Analytics";
 import { ReadingContent } from "@/models/readingContent";
 import { ReadingSession } from "@/models/readingSession";
 import { FileText, BookOpen, BarChart3 } from "lucide-react";
+import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 
 export default function HomePage() {
   const [activeContent, setActiveContent] = useState<ReadingContent | null>(
@@ -33,8 +35,16 @@ export default function HomePage() {
     setActiveTab("analytics");
   };
 
+  // Keyboard shortcuts
+  useKeyboardShortcuts({
+    "1": () => setActiveTab("content"),
+    "2": () => activeContent && setActiveTab("reading"),
+    "3": () => setActiveTab("analytics"),
+  });
+
   return (
-    <AppShell>
+    <ErrorBoundary>
+      <AppShell>
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-3 h-auto p-1 gap-1">
           <TabsTrigger
@@ -87,5 +97,6 @@ export default function HomePage() {
         </div>
       </Tabs>
     </AppShell>
+    </ErrorBoundary>
   );
 }
