@@ -321,7 +321,7 @@ export function ContentInput({ onContentCreated }: ContentInputProps) {
                     <div className="space-y-4">
                       <div className="max-h-[200px] overflow-y-auto">
                         <p
-                          className="text-sm text-gray-700 dark:text-gray-300"
+                          className="text-sm text-foreground"
                           data-testid="generated-content"
                         >
                           {generatedContent.text}

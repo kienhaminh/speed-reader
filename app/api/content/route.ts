@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { ZodError } from "zod";
 import { createContent } from "@/services/contentService";
 import { createReadingContentSchema } from "@/models/readingContent";
 
@@ -17,17 +18,15 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(content, { status: 201 });
   } catch (error) {
-    if (error instanceof Error) {
-      if (
-        error.message.includes("validation") ||
-        error.message.includes("parse")
-      ) {
-        return NextResponse.json(
-          { error: "Invalid request data", details: error.message },
-          { status: 400 }
-        );
-      }
+    // Handle Zod validation errors
+    if (error instanceof ZodError) {
+      return NextResponse.json(
+        { error: "Invalid request data", details: error.errors },
+        { status: 400 }
+      );
+    }
 
+    if (error instanceof Error) {
       if (error.message.includes("must contain at least one word")) {
         return NextResponse.json(
           { error: "Content must contain at least one word" },
