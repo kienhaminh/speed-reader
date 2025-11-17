@@ -46,6 +46,7 @@ export type UserProfile = Omit<User, "passwordHash">;
  * Safe user data for client-side use
  */
 export function sanitizeUser(user: User): UserProfile {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { passwordHash: _, ...sanitized } = user;
   return sanitized;
 }

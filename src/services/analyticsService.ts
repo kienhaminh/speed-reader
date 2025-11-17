@@ -1,4 +1,4 @@
-import { sql, eq, and, gte, lte, isNotNull } from "drizzle-orm";
+import { eq, and, gte, lte, isNotNull } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { logger } from "@/lib/logger";
 import {
@@ -163,7 +163,7 @@ export async function generateAnalyticsSummary(
     };
 
     return summary;
-  } catch (error) {
+  } catch {
     // Return empty summary on error
     return {
       totalTimeMs: 0,
@@ -366,7 +366,8 @@ export async function getAnalyticsForPeriod(
 /**
  * Exports analytics data as CSV
  */
-export async function exportAnalyticsCSV(userId?: string): Promise<string> {
+export async function exportAnalyticsCSV(): Promise<string> {
+  // TODO: Add userId parameter for filtering when user filtering is implemented
   const sessions = await getSessionsInRange();
 
   const csvLines = [

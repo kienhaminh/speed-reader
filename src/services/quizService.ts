@@ -184,7 +184,7 @@ export async function generateQuestions(
       }
 
       generatedQuestions = JSON.parse(jsonMatch[0]);
-    } catch (parseError) {
+    } catch {
       throw new Error("Failed to parse AI response as JSON");
     }
 

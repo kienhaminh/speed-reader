@@ -2,10 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { login } from "@/services/authService";
 import { loginSchema } from "@/models/user";
 import { logger, getRequestContext } from "@/lib/logger";
-import {
-  checkAIGenerationRateLimit,
-  recordAIGeneration,
-} from "@/services/rateLimitService";
 
 export async function POST(request: NextRequest) {
   const context = getRequestContext(request);
@@ -15,10 +11,6 @@ export async function POST(request: NextRequest) {
 
     // Validate request body
     const validatedData = loginSchema.parse(body);
-
-    // Rate limit login attempts (5 per minute per IP/email)
-    // For now, using a simple rate limit key based on email
-    const rateLimitKey = `login:${validatedData.email}`;
 
     // Login user
     const { user, sessionToken } = await login(validatedData);

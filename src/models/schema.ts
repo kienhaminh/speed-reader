@@ -5,7 +5,6 @@ import {
   integer,
   pgEnum,
   json,
-  boolean,
   varchar,
   foreignKey,
 } from "drizzle-orm/pg-core";
