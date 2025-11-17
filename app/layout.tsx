@@ -1,14 +1,9 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
 import "@/app/globals.css";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-  display: "swap",
-  weight: ["400", "500", "600", "700"],
-});
+// Use system fonts as fallback when Google Fonts unavailable
+const fontClassName = "font-sans";
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -35,7 +30,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.variable} antialiased`}>
+      <body className={`${fontClassName} antialiased`}>
         <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>
