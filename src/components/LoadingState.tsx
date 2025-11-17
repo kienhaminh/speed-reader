@@ -19,13 +19,19 @@ export function LoadingState({
         return (
           <div className={`space-y-4 ${className}`}>
             {Array.from({ length: count }).map((_, i) => (
-              <div key={i} className="rounded-lg border bg-card p-6">
+              <motion.div
+                key={i}
+                className="rounded-xl border border-border/50 bg-card p-6 shadow-sm"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: i * 0.1 }}
+              >
                 <div className="space-y-3">
                   <div className="h-5 w-1/3 bg-muted rounded animate-pulse" />
                   <div className="h-4 w-full bg-muted rounded animate-pulse" />
                   <div className="h-4 w-5/6 bg-muted rounded animate-pulse" />
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
         );
@@ -41,17 +47,22 @@ export function LoadingState({
 
       case "chart":
         return (
-          <div className={`rounded-lg border bg-card p-6 ${className}`}>
+          <motion.div
+            className={`rounded-xl border border-border/50 bg-card p-6 shadow-sm ${className}`}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.3 }}
+          >
             <div className="space-y-4">
               <div className="h-6 w-1/4 bg-muted rounded animate-pulse" />
-              <div className="h-[200px] bg-muted rounded animate-pulse" />
+              <div className="h-[200px] bg-muted rounded-lg animate-pulse" />
               <div className="flex gap-4">
                 <div className="h-4 w-20 bg-muted rounded animate-pulse" />
                 <div className="h-4 w-20 bg-muted rounded animate-pulse" />
                 <div className="h-4 w-20 bg-muted rounded animate-pulse" />
               </div>
             </div>
-          </div>
+          </motion.div>
         );
 
       case "full":

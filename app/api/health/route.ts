@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { users } from "@/models/schema";
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     // Test database connection
     const startTime = Date.now();

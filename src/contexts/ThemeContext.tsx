@@ -21,7 +21,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         return stored;
       }
     }
-    return "system";
+    return "dark"; // Default to dark theme
   });
 
   const [systemPreference, setSystemPreference] = useState<"light" | "dark">(() => {

@@ -3,7 +3,6 @@ import { logger } from "@/lib/logger";
 import { users, sessions } from "@/models/schema";
 import {
   type User,
-  type NewUser,
   type SignupRequest,
   type LoginRequest,
   type UserProfile,

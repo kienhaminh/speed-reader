@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { ZodError } from "zod";
 import { generateContent } from "@/services/aiContentService";
 import { generateContentSchema } from "@/models/readingContent";
 import { logger, getRequestContext } from "@/lib/logger";
@@ -20,16 +21,15 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(content, { status: 200 });
   } catch (error) {
+    // Handle Zod validation errors
+    if (error instanceof ZodError) {
+      return NextResponse.json(
+        { error: "Invalid request data", details: error.issues },
+        { status: 400 }
+      );
+    }
+
     if (error instanceof Error) {
-      if (
-        error.message.includes("validation") ||
-        error.message.includes("parse")
-      ) {
-        return NextResponse.json(
-          { error: "Invalid request data", details: error.message },
-          { status: 400 }
-        );
-      }
 
       if (error.message.includes("limit") || error.message.includes("quota")) {
         return NextResponse.json({ error: error.message }, { status: 429 });

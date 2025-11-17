@@ -148,12 +148,12 @@ export function Quiz({ session, onCompleted }: QuizProps) {
             {/* Score Display */}
             <div className="text-center">
               <div
-                className="text-6xl font-bold text-blue-600 mb-2"
+                className="text-6xl font-bold text-primary mb-2"
                 data-testid="score-percent"
               >
                 {result.scorePercent}%
               </div>
-              <p className="text-lg text-gray-600">
+              <p className="text-lg text-muted-foreground">
                 You got{" "}
                 {Math.round((result.scorePercent / 100) * questions.length)} out
                 of {questions.length} questions correct
@@ -186,7 +186,7 @@ export function Quiz({ session, onCompleted }: QuizProps) {
                             Question {index + 1}: {question.prompt}
                           </p>
                           <div className="space-y-1 text-sm">
-                            <p className="text-gray-600">
+                            <p className="text-muted-foreground">
                               Your answer:{" "}
                               <span
                                 className={
@@ -197,7 +197,7 @@ export function Quiz({ session, onCompleted }: QuizProps) {
                               </span>
                             </p>
                             {!isCorrect && (
-                              <p className="text-gray-600">
+                              <p className="text-muted-foreground">
                                 Correct answer:{" "}
                                 <span className="text-green-600">
                                   {question.options[question.correctIndex]}
@@ -214,24 +214,24 @@ export function Quiz({ session, onCompleted }: QuizProps) {
             </div>
 
             {/* Session Summary */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center bg-muted rounded-lg p-4">
               <div>
                 <p className="text-2xl font-bold">{session.mode}</p>
-                <p className="text-sm text-gray-600">Reading Mode</p>
+                <p className="text-sm text-muted-foreground">Reading Mode</p>
               </div>
               <div>
                 <p className="text-2xl font-bold">{session.computedWpm}</p>
-                <p className="text-sm text-gray-600">Reading WPM</p>
+                <p className="text-sm text-muted-foreground">Reading WPM</p>
               </div>
               <div>
                 <p className="text-2xl font-bold">{session.wordsRead}</p>
-                <p className="text-sm text-gray-600">Words Read</p>
+                <p className="text-sm text-muted-foreground">Words Read</p>
               </div>
               <div>
                 <p className="text-2xl font-bold" data-testid="session-status">
                   Completed
                 </p>
-                <p className="text-sm text-gray-600">Status</p>
+                <p className="text-sm text-muted-foreground">Status</p>
               </div>
             </div>
 
@@ -261,7 +261,7 @@ export function Quiz({ session, onCompleted }: QuizProps) {
         <CardContent className="space-y-6">
           {/* Progress */}
           <div className="space-y-2">
-            <div className="flex justify-between text-sm text-gray-600">
+            <div className="flex justify-between text-sm text-muted-foreground">
               <span>
                 Question {currentQuestionIndex + 1} of {questions.length}
               </span>
@@ -272,9 +272,9 @@ export function Quiz({ session, onCompleted }: QuizProps) {
                 % complete
               </span>
             </div>
-            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+            <div className="w-full bg-muted rounded-full h-2">
               <div
-                className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                className="bg-primary h-2 rounded-full transition-all duration-300"
                 style={{
                   width: `${
                     ((currentQuestionIndex + 1) / questions.length) * 100

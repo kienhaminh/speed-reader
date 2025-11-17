@@ -6,16 +6,14 @@
  * Check if element has sufficient color contrast
  * This is a simplified check - in production you'd use a proper WCAG contrast library
  */
-export function checkColorContrast(
-  foreground: string,
-  background: string
-): {
+export function checkColorContrast(): {
   ratio: number;
   wcagAA: boolean;
   wcagAAA: boolean;
 } {
   // Simplified contrast calculation
   // In a real implementation, you'd use a proper color contrast library
+  // and would accept foreground and background color parameters
   const ratio = 4.5; // Placeholder - would calculate actual contrast ratio
 
   return {

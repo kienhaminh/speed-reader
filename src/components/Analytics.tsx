@@ -342,15 +342,15 @@ export function Analytics() {
                   <div className="flex items-center gap-3">
                     <div className="capitalize font-medium">{mode} Mode</div>
                     <div
-                      className="text-sm text-gray-600"
+                      className="text-sm text-muted-foreground"
                       data-testid={`${mode}-mode-avg-wpm`}
                     >
                       {summary.averageWpmByMode[mode]} WPM
                     </div>
                   </div>
-                  <div className="w-48 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                  <div className="w-48 bg-muted rounded-full h-2">
                     <div
-                      className="bg-blue-600 h-2 rounded-full"
+                      className="bg-primary h-2 rounded-full"
                       style={{
                         width: `${
                           (summary.averageWpmByMode[mode] / 500) * 100

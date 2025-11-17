@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 
 export function ThemeToggle() {
-  const { theme, setTheme, resolvedTheme } = useTheme();
+  const { setTheme, resolvedTheme } = useTheme();
   // Use lazy initialization to avoid hydration mismatch
   const [mounted, setMounted] = useState(false);
 
@@ -24,15 +24,18 @@ export function ThemeToggle() {
         aria-label="Toggle theme"
         className="w-11 h-11"
       >
-        <Sun className="h-5 w-5" />
+        <Moon className="h-5 w-5" />
       </Button>
     );
   }
 
   const toggleTheme = () => {
-    if (theme === "light") setTheme("dark");
-    else if (theme === "dark") setTheme("system");
-    else setTheme("light");
+    // Simple toggle between light and dark only
+    if (resolvedTheme === "dark") {
+      setTheme("light");
+    } else {
+      setTheme("dark");
+    }
   };
 
   return (
@@ -40,16 +43,16 @@ export function ThemeToggle() {
       variant="ghost"
       size="icon"
       onClick={toggleTheme}
-      aria-label={`Current theme: ${theme}. Click to cycle themes`}
+      aria-label={`Current theme: ${resolvedTheme}. Click to toggle theme`}
       className="w-11 h-11 transition-transform hover:scale-110 duration-200"
-      title={`Theme: ${theme}`}
+      title={`Theme: ${resolvedTheme}`}
     >
       {resolvedTheme === "dark" ? (
         <Moon className="h-5 w-5 transition-transform duration-200" />
       ) : (
         <Sun className="h-5 w-5 transition-transform duration-200" />
       )}
-      <span className="sr-only">Toggle theme (currently {theme})</span>
+      <span className="sr-only">Toggle theme (currently {resolvedTheme})</span>
     </Button>
   );
 }

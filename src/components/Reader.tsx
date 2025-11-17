@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import {
   Card,
   CardContent,
@@ -21,8 +21,6 @@ import {
 import {
   Play,
   Pause,
-  SkipForward,
-  SkipBack,
   Settings,
   BookOpen,
 } from "lucide-react";
