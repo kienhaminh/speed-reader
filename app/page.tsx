@@ -338,11 +338,11 @@ export default function LandingPage() {
                 >
                   <Card className={`h-full ${plan.highlighted ? 'border-2 border-primary shadow-xl' : 'border-2 border-border/50'} hover:border-primary/50 transition-all duration-300 overflow-hidden bg-card`}>
                     {plan.highlighted && (
-                      <div className="bg-primary text-primary-foreground text-center py-2 text-sm font-medium -mt-6 -mx-6 mb-0 rounded-t-xl">
+                      <div className="bg-primary text-primary-foreground text-center py-2.5 text-sm font-medium">
                         Most Popular
                       </div>
                     )}
-                    <div className="px-6">
+                    <div className={`px-6 pb-6 ${plan.highlighted ? 'pt-2' : 'pt-6'}`}>
                       <h3 className="text-2xl font-bold text-foreground mb-2">{plan.name}</h3>
                       <p className="text-muted-foreground mb-6">{plan.description}</p>
 
