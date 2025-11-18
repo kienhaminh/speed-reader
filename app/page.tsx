@@ -13,7 +13,9 @@ import {
   Zap,
   Brain,
   BarChart3,
-  ChevronRight
+  ChevronRight,
+  Check,
+  Star
 } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
 
@@ -55,6 +57,77 @@ export default function LandingPage() {
     { label: "Average Speed Increase", value: "40%", icon: TrendingUp },
     { label: "Comprehension Rate", value: "85%", icon: Brain },
     { label: "Reading Modes", value: "3", icon: Zap }
+  ];
+
+  const pricingPlans = [
+    {
+      name: "Free",
+      price: "$0",
+      period: "forever",
+      description: "Perfect for getting started",
+      features: [
+        "3 reading modes",
+        "Basic analytics",
+        "5 AI generations per day",
+        "Comprehension testing",
+        "Progress tracking"
+      ],
+      highlighted: false
+    },
+    {
+      name: "Pro",
+      price: "$9",
+      period: "month",
+      description: "For serious readers",
+      features: [
+        "Everything in Free",
+        "Unlimited AI generations",
+        "Advanced analytics",
+        "Priority support",
+        "Custom reading goals",
+        "Export analytics data"
+      ],
+      highlighted: true
+    },
+    {
+      name: "Team",
+      price: "$29",
+      period: "month",
+      description: "For organizations",
+      features: [
+        "Everything in Pro",
+        "Up to 10 team members",
+        "Team analytics dashboard",
+        "Dedicated support",
+        "Custom branding",
+        "API access"
+      ],
+      highlighted: false
+    }
+  ];
+
+  const reviews = [
+    {
+      name: "Sarah Johnson",
+      role: "Student",
+      content: "Speed Reader transformed my studying! I went from 250 WPM to 450 WPM in just 2 weeks. The comprehension tests really help ensure I'm actually understanding what I read.",
+      rating: 5,
+      avatar: "SJ"
+    },
+    {
+      name: "Michael Chen",
+      role: "Software Engineer",
+      content: "As someone who reads a lot of technical documentation, this tool has been a game-changer. The AI-generated content is perfect for practice sessions.",
+      rating: 5,
+      avatar: "MC"
+    },
+    {
+      name: "Emily Rodriguez",
+      role: "Book Club Leader",
+      content: "I love the analytics dashboard! Being able to track my progress over time keeps me motivated. The different reading modes help with different types of content.",
+      rating: 5,
+      avatar: "ER"
+    }
   ];
 
   return (
@@ -120,19 +193,19 @@ export default function LandingPage() {
               >
                 <Button
                   asChild
-                  size="lg"
-                  className="group text-base px-8 py-6 h-auto shadow-lg hover:shadow-xl transition-all duration-300"
+                  size="default"
+                  className="group text-base px-6 py-2 h-auto shadow-lg hover:shadow-xl transition-all duration-300"
                 >
-                  <Link href="/reader" className="flex items-center gap-2">
-                    Start Reading Now
-                    <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
+                  <Link href="/login" className="flex items-center gap-2">
+                    Get Started
+                    <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
                   </Link>
                 </Button>
                 <Button
                   asChild
                   variant="outline"
-                  size="lg"
-                  className="text-base px-8 py-6 h-auto"
+                  size="default"
+                  className="text-base px-6 py-2 h-auto"
                 >
                   <button
                     onClick={() => {
@@ -141,7 +214,7 @@ export default function LandingPage() {
                     className="flex items-center gap-2"
                   >
                     Explore Features
-                    <ChevronRight className="h-5 w-5" />
+                    <ChevronRight className="h-4 w-4" />
                   </button>
                 </Button>
               </motion.div>
@@ -232,6 +305,141 @@ export default function LandingPage() {
           </div>
         </section>
 
+        {/* Pricing Section */}
+        <section id="pricing" aria-label="Pricing plans" className="py-20 sm:py-28 relative bg-muted/30">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-6xl">
+            {/* Section Header */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.6 }}
+              className="text-center mb-16"
+            >
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-4">
+                Simple, Transparent Pricing
+              </h2>
+              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                Choose the plan that fits your reading goals
+              </p>
+            </motion.div>
+
+            {/* Pricing Cards Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+              {pricingPlans.map((plan, index) => (
+                <motion.div
+                  key={plan.name}
+                  initial={shouldReduceMotion ? {} : { opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-100px" }}
+                  transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.3, delay: index * 0.05 }}
+                  whileHover={shouldReduceMotion ? {} : { scale: 1.02, y: -5 }}
+                  className="group"
+                >
+                  <Card className={`${plan.highlighted ? 'border-2 border-primary shadow-xl' : 'border-2 border-border/50'} hover:border-primary/50 transition-all duration-300 overflow-hidden bg-card`}>
+                    {plan.highlighted && (
+                      <div className="bg-primary text-primary-foreground text-center py-2.5 text-sm font-medium">
+                        Most Popular
+                      </div>
+                    )}
+                    <div className={`px-6 pb-6 ${plan.highlighted ? 'pt-2' : 'pt-6'}`}>
+                      <h3 className="text-2xl font-bold text-foreground mb-2">{plan.name}</h3>
+                      <p className="text-muted-foreground mb-6">{plan.description}</p>
+
+                      <div className="mb-6">
+                        <span className="text-4xl font-bold text-foreground">{plan.price}</span>
+                        <span className="text-muted-foreground">/{plan.period}</span>
+                      </div>
+
+                      <Button
+                        asChild
+                        className="w-full mb-6"
+                        variant={plan.highlighted ? "default" : "outline"}
+                      >
+                        <Link href="/login">
+                          Get Started
+                        </Link>
+                      </Button>
+
+                      <ul className="space-y-3">
+                        {plan.features.map((feature) => (
+                          <li key={feature} className="flex items-start gap-3">
+                            <Check className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                            <span className="text-sm text-foreground">{feature}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </Card>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Reviews Section */}
+        <section id="reviews" aria-label="Customer reviews" className="py-20 sm:py-28 relative">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-6xl">
+            {/* Section Header */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.6 }}
+              className="text-center mb-16"
+            >
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-4">
+                What Our Users Say
+              </h2>
+              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                Join thousands of readers improving their skills every day
+              </p>
+            </motion.div>
+
+            {/* Review Cards Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+              {reviews.map((review, index) => (
+                <motion.div
+                  key={review.name}
+                  initial={shouldReduceMotion ? {} : { opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-100px" }}
+                  transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.3, delay: index * 0.05 }}
+                  whileHover={shouldReduceMotion ? {} : { scale: 1.02, y: -5 }}
+                  className="group"
+                >
+                  <Card className="h-full border-2 border-border/50 hover:border-primary/50 transition-all duration-300 overflow-hidden bg-card">
+                    <CardContent className="p-8">
+                      {/* Rating Stars */}
+                      <div className="flex gap-1 mb-4">
+                        {Array.from({ length: review.rating }).map((_, i) => (
+                          <Star key={i} className="h-5 w-5 fill-primary text-primary" />
+                        ))}
+                      </div>
+
+                      {/* Review Content */}
+                      <p className="text-foreground mb-6 leading-relaxed italic">
+                        &ldquo;{review.content}&rdquo;
+                      </p>
+
+                      {/* Reviewer Info */}
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                          <span className="text-primary font-semibold">{review.avatar}</span>
+                        </div>
+                        <div>
+                          <p className="font-semibold text-foreground">{review.name}</p>
+                          <p className="text-sm text-muted-foreground">{review.role}</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* CTA Section */}
         <section aria-label="Call to action" className="py-20 sm:py-28 relative overflow-hidden">
           {/* Background Elements */}
@@ -268,12 +476,12 @@ export default function LandingPage() {
 
                   <Button
                     asChild
-                    size="lg"
-                    className="group text-base px-10 py-6 h-auto shadow-lg hover:shadow-xl transition-all duration-300"
+                    size="default"
+                    className="group text-base px-6 py-2 h-auto shadow-lg hover:shadow-xl transition-all duration-300"
                   >
-                    <Link href="/reader" className="flex items-center gap-2">
-                      Get Started Free
-                      <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
+                    <Link href="/login" className="flex items-center gap-2">
+                      Get Started
+                      <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
                     </Link>
                   </Button>
                 </CardContent>
