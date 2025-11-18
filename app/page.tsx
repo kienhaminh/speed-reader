@@ -336,7 +336,7 @@ export default function LandingPage() {
                   whileHover={shouldReduceMotion ? {} : { scale: 1.02, y: -5 }}
                   className="group"
                 >
-                  <Card className={`h-full ${plan.highlighted ? 'border-2 border-primary shadow-xl' : 'border-2 border-border/50'} hover:border-primary/50 transition-all duration-300 overflow-hidden bg-card`}>
+                  <Card className={`${plan.highlighted ? 'border-2 border-primary shadow-xl' : 'border-2 border-border/50'} hover:border-primary/50 transition-all duration-300 overflow-hidden bg-card`}>
                     {plan.highlighted && (
                       <div className="bg-primary text-primary-foreground text-center py-2.5 text-sm font-medium">
                         Most Popular
