@@ -336,13 +336,13 @@ export default function LandingPage() {
                   whileHover={shouldReduceMotion ? {} : { scale: 1.02, y: -5 }}
                   className="group"
                 >
-                  <Card className={`h-full ${plan.highlighted ? 'border-2 border-primary shadow-xl' : 'border-2 border-border/50'} hover:border-primary/50 transition-all duration-300 overflow-hidden bg-card relative`}>
+                  <Card className={`h-full ${plan.highlighted ? 'border-2 border-primary shadow-xl' : 'border-2 border-border/50'} hover:border-primary/50 transition-all duration-300 overflow-hidden bg-card`}>
                     {plan.highlighted && (
-                      <div className="absolute top-0 left-0 right-0 bg-primary text-primary-foreground text-center py-2 text-sm font-medium">
+                      <div className="bg-primary text-primary-foreground text-center py-2 text-sm font-medium -mt-6 -mx-6 mb-0 rounded-t-xl">
                         Most Popular
                       </div>
                     )}
-                    <CardContent className={`p-8 ${plan.highlighted ? 'pt-12' : ''}`}>
+                    <div className="px-6">
                       <h3 className="text-2xl font-bold text-foreground mb-2">{plan.name}</h3>
                       <p className="text-muted-foreground mb-6">{plan.description}</p>
 
@@ -353,7 +353,7 @@ export default function LandingPage() {
 
                       <Button
                         asChild
-                        className={`w-full mb-6 ${plan.highlighted ? '' : 'variant-outline'}`}
+                        className="w-full mb-6"
                         variant={plan.highlighted ? "default" : "outline"}
                       >
                         <Link href="/login">
@@ -369,7 +369,7 @@ export default function LandingPage() {
                           </li>
                         ))}
                       </ul>
-                    </CardContent>
+                    </div>
                   </Card>
                 </motion.div>
               ))}
