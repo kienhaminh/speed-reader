@@ -1,20 +1,30 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { SkipLink } from "@/components/SkipLink";
 import { HelpModal } from "@/components/HelpModal";
 import { Button } from "@/components/ui/button";
-import { Book, HelpCircle } from "lucide-react";
+import { Book, HelpCircle, LogOut } from "lucide-react";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
+import { isAuthenticated, logout } from "@/lib/auth";
 
 interface AppShellProps {
   children: React.ReactNode;
 }
 
 export function AppShell({ children }: AppShellProps) {
+  const router = useRouter();
   const [isScrolled, setIsScrolled] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
+  // Initialize authenticated state directly
+  const [authenticated, setAuthenticated] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return isAuthenticated();
+    }
+    return false;
+  });
 
   useEffect(() => {
     const handleScroll = () => {
@@ -24,6 +34,13 @@ export function AppShell({ children }: AppShellProps) {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // Handle logout
+  const handleLogout = () => {
+    logout();
+    setAuthenticated(false);
+    router.push("/");
+  };
 
   // Help modal keyboard shortcut
   useKeyboardShortcuts({
@@ -57,6 +74,19 @@ export function AppShell({ children }: AppShellProps) {
           </div>
 
           <nav aria-label="Main navigation" className="flex items-center gap-2">
+            {authenticated && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleLogout}
+                aria-label="Logout"
+                className="gap-2 transition-all duration-200 hover:bg-destructive/10 hover:text-destructive"
+                title="Logout"
+              >
+                <LogOut className="h-4 w-4" />
+                <span className="hidden sm:inline">Logout</span>
+              </Button>
+            )}
             <Button
               variant="ghost"
               size="icon"
