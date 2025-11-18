@@ -332,7 +332,7 @@ export default function LandingPage() {
                   initial={shouldReduceMotion ? {} : { opacity: 0, y: 30 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, margin: "-100px" }}
-                  transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.5, delay: index * 0.1 }}
+                  transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.3, delay: index * 0.05 }}
                   whileHover={shouldReduceMotion ? {} : { scale: 1.02, y: -5 }}
                   className="group"
                 >
@@ -404,7 +404,7 @@ export default function LandingPage() {
                   initial={shouldReduceMotion ? {} : { opacity: 0, y: 30 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, margin: "-100px" }}
-                  transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.5, delay: index * 0.1 }}
+                  transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.3, delay: index * 0.05 }}
                   whileHover={shouldReduceMotion ? {} : { scale: 1.02, y: -5 }}
                   className="group"
                 >
