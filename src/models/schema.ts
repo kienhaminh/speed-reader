@@ -14,6 +14,13 @@ import { relations } from "drizzle-orm";
 export const languageEnum = pgEnum("language", ["en", "vi"]);
 export const sourceEnum = pgEnum("source", ["paste", "upload", "ai"]);
 export const modeEnum = pgEnum("mode", ["word", "chunk", "paragraph"]);
+export const contentTypeEnum = pgEnum("content_type", [
+  "url",
+  "text",
+  "image",
+  "pdf",
+  "document",
+]);
 
 // Tables
 export const users = pgTable("users", {
@@ -134,6 +141,30 @@ export const studyLogs = pgTable("study_logs", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+export const knowledgeItems = pgTable("knowledge_items", {
+  id: text("id").primaryKey(),
+  contentType: contentTypeEnum("content_type").notNull(),
+  sourceUrl: text("source_url"),
+  sourceTitle: text("source_title"),
+  rawContent: text("raw_content"),
+  extractedText: text("extracted_text"),
+  metadata: json("metadata").$type<{
+    fileSize?: number;
+    mimeType?: string;
+    imageWidth?: number;
+    imageHeight?: number;
+    pageCount?: number;
+    language?: string;
+    wordCount?: number;
+    [key: string]: unknown;
+  }>(),
+  keywords: json("keywords").$type<string[]>(),
+  summary: text("summary"),
+  createdByUserId: text("created_by_user_id"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many, one }) => ({
   readingContent: many(readingContent),
@@ -141,6 +172,7 @@ export const usersRelations = relations(users, ({ many, one }) => ({
   sessions: many(sessions),
   emailVerifications: many(emailVerifications),
   passwordResets: many(passwordResets),
+  knowledgeItems: many(knowledgeItems),
   studyLog: one(studyLogs, {
     fields: [users.id],
     references: [studyLogs.userId],
@@ -230,3 +262,13 @@ export const studyLogsRelations = relations(studyLogs, ({ one }) => ({
     references: [users.id],
   }),
 }));
+
+export const knowledgeItemsRelations = relations(
+  knowledgeItems,
+  ({ one }) => ({
+    createdBy: one(users, {
+      fields: [knowledgeItems.createdByUserId],
+      references: [users.id],
+    }),
+  })
+);

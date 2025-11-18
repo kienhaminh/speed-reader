@@ -49,6 +49,19 @@ export {
   type UserProfile,
 } from "@/models/user";
 
+// Knowledge Item schemas
+export {
+  createKnowledgeItemSchema,
+  listKnowledgeItemsSchema,
+  paginatedKnowledgeItemsSchema,
+  type CreateKnowledgeItemRequest,
+  type ListKnowledgeItemsRequest,
+  type PaginatedKnowledgeItems,
+  type KnowledgeItem,
+  type ExtractedKnowledge,
+  type KnowledgeMetadata,
+} from "@/models/knowledgeItem";
+
 // Additional validation helpers
 import { z } from "zod";
 
