@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, lazy, Suspense } from "react";
+import { useState, lazy, Suspense, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AppShell } from "@/components/AppShell";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
@@ -11,6 +12,7 @@ import { ReadingContent } from "@/models/readingContent";
 import { ReadingSession } from "@/models/readingSession";
 import { FileText, BookOpen, BarChart3 } from "lucide-react";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
+import { isAuthenticated } from "@/lib/auth";
 
 // Lazy load Analytics component (includes heavy Recharts dependency)
 const Analytics = lazy(() =>
@@ -18,6 +20,7 @@ const Analytics = lazy(() =>
 );
 
 export default function HomePage() {
+  const router = useRouter();
   const [activeContent, setActiveContent] = useState<ReadingContent | null>(
     null
   );
@@ -25,6 +28,20 @@ export default function HomePage() {
     null
   );
   const [activeTab, setActiveTab] = useState("content");
+  // Check authentication and show loading if not authenticated
+  const [isLoading] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return !isAuthenticated();
+    }
+    return true;
+  });
+
+  // Redirect if not authenticated
+  useEffect(() => {
+    if (!isAuthenticated()) {
+      router.push("/");
+    }
+  }, [router]);
 
   const handleContentCreated = (content: ReadingContent) => {
     setActiveContent(content);
@@ -46,6 +63,15 @@ export default function HomePage() {
     "2": () => activeContent && setActiveTab("reading"),
     "3": () => setActiveTab("analytics"),
   });
+
+  // Show loading state while checking authentication
+  if (isLoading) {
+    return (
+      <AppShell>
+        <LoadingState variant="card" />
+      </AppShell>
+    );
+  }
 
   return (
     <ErrorBoundary>

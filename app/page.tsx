@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { AppShell } from "@/components/AppShell";
+import { LoginForm } from "@/components/LoginForm";
 import {
   BookOpen,
   Sparkles,
@@ -229,6 +230,37 @@ export default function LandingPage() {
                 </motion.div>
               ))}
             </div>
+          </div>
+        </section>
+
+        {/* Login Section */}
+        <section id="login" aria-label="Login" className="py-20 sm:py-28 relative">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-6xl">
+            {/* Section Header */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.6 }}
+              className="text-center mb-12"
+            >
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-4">
+                Get Started
+              </h2>
+              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                Login to access the speed reader and start improving your reading skills
+              </p>
+            </motion.div>
+
+            {/* Login Form */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+            >
+              <LoginForm />
+            </motion.div>
           </div>
         </section>
 
