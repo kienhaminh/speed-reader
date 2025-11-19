@@ -14,6 +14,8 @@ import { relations } from "drizzle-orm";
 export const languageEnum = pgEnum("language", ["en", "vi"]);
 export const sourceEnum = pgEnum("source", ["paste", "upload", "ai"]);
 export const modeEnum = pgEnum("mode", ["word", "chunk", "paragraph"]);
+export const difficultyEnum = pgEnum("difficulty", ["beginner", "intermediate", "advanced", "expert"]);
+export const xpEventTypeEnum = pgEnum("xp_event_type", ["session", "quiz", "challenge", "streak", "milestone"]);
 
 // Tables
 export const users = pgTable("users", {
@@ -22,6 +24,19 @@ export const users = pgTable("users", {
   passwordHash: text("password_hash").notNull(),
   name: varchar("name", { length: 255 }),
   emailVerifiedAt: timestamp("email_verified_at"),
+  // XP and Level System
+  level: integer("level").default(1).notNull(),
+  totalXp: integer("total_xp").default(0).notNull(),
+  streakDays: integer("streak_days").default(0).notNull(),
+  lastStreakDate: timestamp("last_streak_date"),
+  // User Preferences (stored as JSON)
+  preferences: json("preferences").$type<{
+    defaultMode?: string;
+    defaultWPM?: number;
+    defaultChunkSize?: number;
+    autoStart?: boolean;
+    showTimer?: boolean;
+  }>(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -134,6 +149,45 @@ export const studyLogs = pgTable("study_logs", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+// Story Challenges
+export const storyChallenges = pgTable("story_challenges", {
+  id: text("id").primaryKey(),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  difficulty: difficultyEnum("difficulty").notNull(),
+  requiredLevel: integer("required_level").notNull(),
+  xpReward: integer("xp_reward").notNull(),
+  content: text("content").notNull(),
+  wordCount: integer("word_count").notNull(),
+  estimatedTimeMinutes: integer("estimated_time_minutes").notNull(),
+  isActive: integer("is_active").default(1).notNull(), // Using integer for boolean (1 = true, 0 = false)
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Challenge Attempts
+export const challengeAttempts = pgTable("challenge_attempts", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull(),
+  challengeId: text("challenge_id").notNull(),
+  sessionId: text("session_id"), // Link to reading session
+  scorePercent: integer("score_percent").notNull(),
+  wpm: integer("wpm").notNull(),
+  completedAt: timestamp("completed_at").defaultNow().notNull(),
+  xpAwarded: integer("xp_awarded").notNull(),
+});
+
+// XP Transactions
+export const xpTransactions = pgTable("xp_transactions", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull(),
+  amount: integer("amount").notNull(),
+  eventType: xpEventTypeEnum("event_type").notNull(),
+  description: text("description").notNull(),
+  metadata: json("metadata").$type<Record<string, unknown>>(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many, one }) => ({
   readingContent: many(readingContent),
@@ -145,6 +199,8 @@ export const usersRelations = relations(users, ({ many, one }) => ({
     fields: [users.id],
     references: [studyLogs.userId],
   }),
+  challengeAttempts: many(challengeAttempts),
+  xpTransactions: many(xpTransactions),
 }));
 
 export const sessionsRelations = relations(sessions, ({ one }) => ({
@@ -227,6 +283,32 @@ export const comprehensionResultsRelations = relations(
 export const studyLogsRelations = relations(studyLogs, ({ one }) => ({
   user: one(users, {
     fields: [studyLogs.userId],
+    references: [users.id],
+  }),
+}));
+
+export const storyChallengesRelations = relations(storyChallenges, ({ many }) => ({
+  attempts: many(challengeAttempts),
+}));
+
+export const challengeAttemptsRelations = relations(challengeAttempts, ({ one }) => ({
+  user: one(users, {
+    fields: [challengeAttempts.userId],
+    references: [users.id],
+  }),
+  challenge: one(storyChallenges, {
+    fields: [challengeAttempts.challengeId],
+    references: [storyChallenges.id],
+  }),
+  session: one(readingSessions, {
+    fields: [challengeAttempts.sessionId],
+    references: [readingSessions.id],
+  }),
+}));
+
+export const xpTransactionsRelations = relations(xpTransactions, ({ one }) => ({
+  user: one(users, {
+    fields: [xpTransactions.userId],
     references: [users.id],
   }),
 }));

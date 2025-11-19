@@ -49,7 +49,7 @@ class Logger {
     level: LogLevel,
     message: string,
     context?: LogContext,
-    error?: Error
+    error?: unknown
   ): LogEntry {
     const entry: LogEntry = {
       timestamp: new Date().toISOString(),
@@ -62,11 +62,24 @@ class Logger {
     }
 
     if (error) {
-      entry.error = {
-        name: error.name,
-        message: error.message,
-        stack: error.stack,
-      };
+      // Handle unknown error type safely
+      if (error instanceof Error) {
+        entry.error = {
+          name: error.name,
+          message: error.message,
+          stack: error.stack,
+        };
+      } else if (typeof error === "string") {
+        entry.error = {
+          name: "Error",
+          message: error,
+        };
+      } else {
+        entry.error = {
+          name: "Error",
+          message: String(error),
+        };
+      }
     }
 
     return entry;
@@ -103,13 +116,13 @@ class Logger {
     }
   }
 
-  warn(message: string, context?: LogContext, error?: Error): void {
+  warn(message: string, context?: LogContext, error?: unknown): void {
     if (this.shouldLog(LogLevel.WARN)) {
       this.output(this.formatLog(LogLevel.WARN, message, context, error));
     }
   }
 
-  error(message: string, context?: LogContext, error?: Error): void {
+  error(message: string, context?: LogContext, error?: unknown): void {
     if (this.shouldLog(LogLevel.ERROR)) {
       this.output(this.formatLog(LogLevel.ERROR, message, context, error));
     }
@@ -132,7 +145,7 @@ class Logger {
   apiError(
     method: string,
     endpoint: string,
-    error: Error,
+    error: unknown,
     context?: LogContext
   ): void {
     this.error(
@@ -167,7 +180,7 @@ class Logger {
   serviceError(
     service: string,
     operation: string,
-    error: Error,
+    error: unknown,
     context?: LogContext
   ): void {
     this.error(
