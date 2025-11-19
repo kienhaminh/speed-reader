@@ -96,7 +96,7 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
-    logger.info("User profile updated", { userId, updates: Object.keys(updates) });
+    logger.info("User profile updated", { userId, updatedFields: Object.keys(updates).join(", ") });
 
     return NextResponse.json({
       success: true,
