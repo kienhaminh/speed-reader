@@ -12,8 +12,7 @@ import {
   BookOpen,
   Bell,
   Shield,
-  Save,
-  Palette
+  Save
 } from "lucide-react";
 import { motion } from "framer-motion";
 

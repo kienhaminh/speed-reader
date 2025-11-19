@@ -268,9 +268,11 @@ export async function getUserChallengeStats(userId: string): Promise<{
       expert: { attempted: 0, completed: 0, averageScore: 0 },
     };
 
+    type AttemptWithDifficulty = typeof attempts[number];
+
     const difficultyGroups = new Map<
       Difficulty,
-      { attempts: typeof challengeAttempts.$inferSelect[]; challenges: Set<string> }
+      { attempts: AttemptWithDifficulty[]; challenges: Set<string> }
     >();
 
     attempts.forEach((attempt) => {
@@ -279,7 +281,7 @@ export async function getUserChallengeStats(userId: string): Promise<{
         difficultyGroups.set(difficulty, { attempts: [], challenges: new Set() });
       }
       const group = difficultyGroups.get(difficulty)!;
-      group.attempts.push(attempt as any);
+      group.attempts.push(attempt);
       group.challenges.add(attempt.challengeId);
     });
 

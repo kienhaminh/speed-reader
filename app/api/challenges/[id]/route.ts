@@ -12,11 +12,11 @@ const attemptSchema = z.object({
 // GET /api/challenges/[id] - Get challenge by ID
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id: challengeId } = await params;
     const userId = request.headers.get("x-user-id") || undefined;
-    const challengeId = params.id;
 
     logger.apiRequest("GET", `/api/challenges/${challengeId}`, { userId });
 
@@ -34,7 +34,7 @@ export async function GET(
       data: challenge,
     });
   } catch (error) {
-    logger.apiError("GET", `/api/challenges/${params.id}`, error);
+    logger.apiError("GET", "/api/challenges/[id]", error);
 
     return NextResponse.json(
       { success: false, error: "Failed to fetch challenge" },
@@ -46,9 +46,10 @@ export async function GET(
 // POST /api/challenges/[id]/attempt - Record challenge attempt
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id: challengeId } = await params;
     const userId = request.headers.get("x-user-id");
     if (!userId) {
       return NextResponse.json(
@@ -57,7 +58,6 @@ export async function POST(
       );
     }
 
-    const challengeId = params.id;
     const body = await request.json();
 
     logger.apiRequest("POST", `/api/challenges/${challengeId}/attempt`, {
@@ -81,14 +81,14 @@ export async function POST(
       data: result,
     });
   } catch (error) {
-    logger.apiError("POST", `/api/challenges/${params.id}/attempt`, error);
+    logger.apiError("POST", "/api/challenges/[id]/attempt", error);
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         {
           success: false,
           error: "Invalid request data",
-          details: error.errors,
+          details: error.issues,
         },
         { status: 400 }
       );

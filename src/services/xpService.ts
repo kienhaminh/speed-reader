@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
-import { users, xpTransactions, storyChallenges, challengeAttempts } from "@/models/schema";
-import { eq, desc, and, sql } from "drizzle-orm";
+import { users, xpTransactions, challengeAttempts } from "@/models/schema";
+import { eq, desc, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { logger } from "@/lib/logger";
 
@@ -75,7 +75,7 @@ export async function awardXP(
   amount: number,
   eventType: XPEventType,
   description: string,
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 ): Promise<{
   success: boolean;
   transaction: typeof xpTransactions.$inferSelect;

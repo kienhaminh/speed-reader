@@ -184,7 +184,7 @@ export const xpTransactions = pgTable("xp_transactions", {
   amount: integer("amount").notNull(),
   eventType: xpEventTypeEnum("event_type").notNull(),
   description: text("description").notNull(),
-  metadata: json("metadata").$type<Record<string, any>>(),
+  metadata: json("metadata").$type<Record<string, unknown>>(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

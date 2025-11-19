@@ -1,17 +1,15 @@
 "use client";
 
-import { useState, lazy, Suspense } from "react";
+import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { ContentInput } from "@/components/ContentInput";
 import { Reader } from "@/components/Reader";
-import { LoadingState } from "@/components/LoadingState";
 import { ReadingContent } from "@/models/readingContent";
 import { ReadingSession } from "@/models/readingSession";
 import { FileText, BookOpen, Sparkles } from "lucide-react";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { motion } from "framer-motion";
 
 export default function ReaderPage() {
@@ -68,7 +66,7 @@ export default function ReaderPage() {
               <div className="flex-1">
                 <h3 className="font-semibold text-foreground mb-1">AI Question Generation</h3>
                 <p className="text-sm text-muted-foreground">
-                  After reading, we'll automatically generate comprehension questions to test your understanding.
+                  After reading, we&apos;ll automatically generate comprehension questions to test your understanding.
                   Answer correctly to earn bonus XP!
                 </p>
               </div>

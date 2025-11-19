@@ -45,7 +45,7 @@ export async function PATCH(request: NextRequest) {
 
     logger.apiRequest("PATCH", "/api/user/profile", { userId });
 
-    const updates: any = {};
+    const updates: Partial<typeof users.$inferInsert> = {};
 
     // Update basic profile fields
     if (body.name !== undefined) {

@@ -8,7 +8,6 @@ import {
   Target,
   Zap,
   Trophy,
-  Calendar,
   Clock,
   Award,
   Star,
@@ -107,7 +106,7 @@ export default function DashboardPage() {
           Welcome back, {mockUser.name}! 👋
         </h1>
         <p className="text-muted-foreground">
-          Here's your reading progress overview
+          Here&apos;s your reading progress overview
         </p>
       </div>
 
@@ -274,7 +273,7 @@ export default function DashboardPage() {
                   { name: "Speed Demon", color: "from-yellow-500 to-orange-500" },
                   { name: "Streak Master", color: "from-red-500 to-pink-500" },
                   { name: "Quiz Master", color: "from-blue-500 to-purple-500" }
-                ].map((badge, index) => (
+                ].map((badge) => (
                   <div
                     key={badge.name}
                     className="flex flex-col items-center gap-2 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors cursor-pointer"
